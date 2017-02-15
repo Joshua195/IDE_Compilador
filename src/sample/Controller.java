@@ -8,9 +8,18 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import model.File;
+import javafx.scene.input.KeyEvent;
+import javafx.stage.FileChooser;
+import model.Archivo;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public class Controller {
 
@@ -35,12 +44,42 @@ public class Controller {
     @FXML
     Button buttonOpen;
 
+//    @FXML
+//    TabPane tabPaneCode;
     @FXML
-    TabPane tabPaneCode;
+    TextArea textAreaCode;
+    @FXML
+    Label labelContentStatus;
+    @FXML
+    Label labelContentWord;
+    @FXML
+    Label labelContentProgress;
 
     @FXML
-    ListView<File> historyFiles;
-    ObservableList<File> observableListFileData = FXCollections.observableArrayList();
+    ListView<Archivo> historyFiles;
+    ObservableList<Archivo> observableListFileData = FXCollections.observableArrayList();
+
+/*
+Salidas
+ */
+    @FXML
+    private TextArea textAreaLexico;
+    @FXML
+    private TextArea textAreaSintactico;
+    @FXML
+    private TextArea textAreaSemantico;
+    @FXML
+    private TextArea textAreaCodigoIntermedio;
+    @FXML
+    private TextArea textAreaErrores;
+    @FXML
+    private TextArea textAreaSalida;
+    @FXML
+    private TextArea textAreaTablaSimbolos;
+
+/******************/
+
+    private String fileActive;
 
     @FXML
     private void initialize() {
@@ -50,18 +89,14 @@ public class Controller {
     }
 
     public void initEvents(){
-        menuItemNew.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e) {
-                System.out.println("Menu Item New");
-                newFile();
-            }
-        });
 
-        menuItemOpen.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e) {
-                System.out.println("Menu Item Open");
-            }
-        });
+        menuItemNew.setOnAction(event -> newFile());
+
+        menuItemSave.setOnAction(event -> saveFile());
+
+        buttonNew.setOnAction(event -> newFile());
+
+        textAreaCode.setOnKeyTyped(event -> countChar());
     }
 
     public void initButtons(){
@@ -76,27 +111,60 @@ public class Controller {
     }
 
     public void newFile(){
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setContentText("Name:");
-
-        Optional<String> result = dialog.showAndWait();
-        if (result.isPresent()){
-            System.out.println("Name of file: " + result.get());
-            String nameFile = result.get() + ".rj";
-            Tab auxTab = new Tab(nameFile);
-            TextArea textArea = new TextArea();
-            textArea.setWrapText(true);
-            auxTab.setContent(textArea);
-            tabPaneCode.getTabs().add(auxTab);
-//            observableListFileData.add(new File(nameFile,"test"));
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("New File...");
+        File file = fileChooser.showSaveDialog(Main.mainStage);
+        if (file != null){
+            Archivo archivo = new Archivo(file.getName() + ".rj",file.getAbsolutePath());
+            System.out.println("Name of file: " + archivo.getName());
+            System.out.println("Route File: " + archivo.getLocation());
+            labelContentStatus.setText("Archivo actual -> " + archivo.getName());
+            fileActive = archivo.getName();
+            observableListFileData.add(archivo);
+            textAreaCode.setDisable(false);
+            textAreaCode.requestFocus();
         }
     }
 
     public void saveFile(){
+        ArrayList<Archivo> archivos = new ArrayList<>();
 
+        for (int i = 0; i < observableListFileData.size(); i++){
+            if (observableListFileData.get(i).getName().equals(fileActive)){
+                Archivo archivo = observableListFileData.get(i);
+                File file = new File(archivo.getLocation());
+                if (file != null){
+                    String code = textAreaCode.getText();
+                    BufferedWriter bufferedWriter = null;
+                    try {
+                        bufferedWriter = new BufferedWriter(new FileWriter(file));
+                        bufferedWriter.write(code);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }finally {
+                        try {
+                            bufferedWriter.close();
+                            labelContentProgress.setText("Archivo guardado");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void initList(){
         historyFiles.setItems(observableListFileData);
+    }
+
+    public void countChar(){
+        String text = textAreaCode.getText();
+        if (!text.isEmpty()){
+            labelContentWord.setText(String.valueOf(text.length()));
+        }else {
+            labelContentWord.setText("0");
+        }
+
     }
 }

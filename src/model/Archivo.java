@@ -1,13 +1,13 @@
 package model;
 
-public class File {
+public class Archivo {
 
     private String name;
     private String location;
 
-    public File(String name, String location) {
+    public Archivo(String name, String location) {
         this.name = name;
-        this.location = location;
+        this.location = location + ".rj";
     }
 
     public String getName() {
@@ -23,7 +23,7 @@ public class File {
     }
 
     public void setLocation(String location) {
-        this.location = location;
+        this.location = location + ".rj";
     }
 
     @Override
