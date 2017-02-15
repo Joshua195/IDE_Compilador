@@ -12,10 +12,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import model.Archivo;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +57,7 @@ public class Controller {
 
     @FXML
     ListView<Archivo> historyFiles;
-    ObservableList<Archivo> observableListFileData = FXCollections.observableArrayList();
+    private ObservableList<Archivo> observableListFileData = FXCollections.observableArrayList();
 
 /*
 Salidas
@@ -88,18 +88,19 @@ Salidas
         initList();
     }
 
-    public void initEvents(){
-
+    private void initEvents(){
         menuItemNew.setOnAction(event -> newFile());
-
         menuItemSave.setOnAction(event -> saveFile());
-
+        menuItemOpen.setOnAction(event -> openFile());
         buttonNew.setOnAction(event -> newFile());
-
+        buttonSave.setOnAction(event -> saveFile());
+        buttonOpen.setOnAction(event -> openFile());
         textAreaCode.setOnKeyTyped(event -> countChar());
+
+        historyFiles.setOnMouseClicked(event -> openListViewItem(historyFiles.getSelectionModel().getSelectedItem()));
     }
 
-    public void initButtons(){
+    private void initButtons(){
         Image imageNewFile = new Image(getClass().getResourceAsStream("new-file.png"));
         buttonNew.setGraphic(new ImageView(imageNewFile));
 
@@ -110,12 +111,15 @@ Salidas
         buttonSave.setGraphic(new ImageView(imageSaveFile));
     }
 
-    public void newFile(){
+    private void newFile(){
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("New File...");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("RJ", "*.rj")
+        );
         File file = fileChooser.showSaveDialog(Main.mainStage);
         if (file != null){
-            Archivo archivo = new Archivo(file.getName() + ".rj",file.getAbsolutePath());
+            Archivo archivo = new Archivo(file.getName(),file.getAbsolutePath());
             System.out.println("Name of file: " + archivo.getName());
             System.out.println("Route File: " + archivo.getLocation());
             labelContentStatus.setText("Archivo actual -> " + archivo.getName());
@@ -126,45 +130,93 @@ Salidas
         }
     }
 
-    public void saveFile(){
-        ArrayList<Archivo> archivos = new ArrayList<>();
-
-        for (int i = 0; i < observableListFileData.size(); i++){
-            if (observableListFileData.get(i).getName().equals(fileActive)){
-                Archivo archivo = observableListFileData.get(i);
+    private void saveFile(){
+        for (Archivo archivo : observableListFileData) {
+            if (archivo.getName().equals(fileActive)) {
                 File file = new File(archivo.getLocation());
-                if (file != null){
-                    String code = textAreaCode.getText();
-                    BufferedWriter bufferedWriter = null;
-                    try {
-                        bufferedWriter = new BufferedWriter(new FileWriter(file));
-                        bufferedWriter.write(code);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }finally {
-                        try {
-                            bufferedWriter.close();
-                            labelContentProgress.setText("Archivo guardado");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                String code = textAreaCode.getText();
+                BufferedWriter bufferedWriter;
+                try {
+                    bufferedWriter = new BufferedWriter(new FileWriter(file));
+                    bufferedWriter.write(code);
+                    bufferedWriter.close();
+                    labelContentProgress.setText("Archivo guardado");
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
 
-    public void initList(){
+    private void openFile(){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open...");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("RJ", "*.rj")
+        );
+        File file = fileChooser.showOpenDialog(Main.mainStage);
+        if (file != null) {
+            Archivo archivo = new Archivo(file.getName(), file.getAbsolutePath());
+            try {
+                String code = new String(Files.readAllBytes(Paths.get(archivo.getLocation())));
+                textAreaCode.setText(code);
+                textAreaCode.requestFocus();
+                textAreaCode.setDisable(false);
+                fileActive = archivo.getName();
+                labelContentStatus.setText("Archivo actual -> " + archivo.getName());
+                if (observableListFileData.size() == 0) {
+                    observableListFileData.add(archivo);
+                }
+                for (Archivo aux : observableListFileData) {
+                    if (!aux.getName().equals(archivo.getName()) && !aux.getLocation().equals(archivo.getLocation())) {
+                        observableListFileData.add(archivo);
+                        break;
+                    }
+                }
+                labelContentWord.setText(String.valueOf(code.length()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void initList(){
         historyFiles.setItems(observableListFileData);
     }
 
-    public void countChar(){
+    private void countChar(){
         String text = textAreaCode.getText();
         if (!text.isEmpty()){
             labelContentWord.setText(String.valueOf(text.length()));
         }else {
             labelContentWord.setText("0");
         }
+    }
 
+    private void error(){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Archivo...");
+        alert.setHeaderText(null);
+        alert.setContentText("Error al abrir el archivo");
+        alert.showAndWait();
+    }
+
+    private void openListViewItem(Archivo archivo){
+        File file = new File(archivo.getLocation());
+        if (file.exists()){
+            try {
+                String code = new String(Files.readAllBytes(Paths.get(archivo.getLocation())));
+                textAreaCode.setText(code);
+                textAreaCode.requestFocus();
+                textAreaCode.setDisable(false);
+                fileActive = archivo.getName();
+                labelContentStatus.setText("Archivo actual -> " + archivo.getName());
+                labelContentWord.setText(String.valueOf(code.length()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else {
+            error();
+        }
     }
 }

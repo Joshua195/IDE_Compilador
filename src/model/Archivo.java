@@ -4,10 +4,11 @@ public class Archivo {
 
     private String name;
     private String location;
+    private boolean status;
 
     public Archivo(String name, String location) {
         this.name = name;
-        this.location = location + ".rj";
+        this.location = location;
     }
 
     public String getName() {
@@ -23,7 +24,15 @@ public class Archivo {
     }
 
     public void setLocation(String location) {
-        this.location = location + ".rj";
+        this.location = location;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 
     @Override
