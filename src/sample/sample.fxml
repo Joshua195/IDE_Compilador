@@ -79,7 +79,8 @@
                                 </AnchorPane>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="517.0" prefWidth="958.0">
                            <children>
-                              <TextArea fx:id="textAreaCode" disable="true" prefHeight="200.0" prefWidth="200.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <TextArea fx:id="textAreaCountLines" prefHeight="497.0" prefWidth="43.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="1000.0" AnchorPane.topAnchor="0.0" />
+                              <TextArea fx:id="textAreaCode" disable="true" layoutX="43.0" prefHeight="497.0" prefWidth="1000.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="43.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                            </children>
                                 </AnchorPane>
                             </items>

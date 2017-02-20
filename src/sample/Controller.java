@@ -49,6 +49,9 @@ public class Controller {
     @FXML
     TextArea textAreaCode;
     @FXML
+    TextArea textAreaCountLines;
+
+    @FXML
     Label labelContentStatus;
     @FXML
     Label labelContentWord;
@@ -86,6 +89,7 @@ Salidas
         initEvents();
         initButtons();
         initList();
+        test();
     }
 
     private void initEvents(){
@@ -191,6 +195,11 @@ Salidas
         }else {
             labelContentWord.setText("0");
         }
+        String lines = "";
+        for (int i = 1; i < countLines() + 1; i++){
+            lines += i + "\n";
+        }
+        textAreaCountLines.setText(lines);
     }
 
     private void error(){
@@ -218,5 +227,21 @@ Salidas
         }else {
             error();
         }
+    }
+
+    private void test(){
+//        textAreaCountLines.scrollTopProperty().bindBidirectional(textAreaCode.scrollTopProperty());
+        textAreaCode.scrollTopProperty().bindBidirectional(textAreaCountLines.scrollTopProperty());
+    }
+
+    private int countLines(){
+        String text = textAreaCode.getText();
+        int count = 0;
+        for (int  i = 0; i < text.length(); i++){
+            if (text.charAt(i) == '\n'){
+                count++;
+            }
+        }
+        return count + 1;
     }
 }
