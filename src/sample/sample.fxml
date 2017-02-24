@@ -34,7 +34,7 @@
                             </accelerator>
                         </MenuItem>
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Close">
+                        <MenuItem fx:id="menuItemClose" mnemonicParsing="false" text="Close">
                             <accelerator>
                                 <KeyCodeCombination alt="DOWN" code="F4" control="UP" meta="UP" shift="UP" shortcut="UP" />
                             </accelerator>
@@ -58,6 +58,10 @@
                 <Button fx:id="buttonNew" mnemonicParsing="false" />
                 <Button fx:id="buttonOpen" mnemonicParsing="false" />
                 <Button fx:id="buttonSave" mnemonicParsing="false" />
+            <Button mnemonicParsing="false" text="Lexico" />
+            <Button mnemonicParsing="false" text="Sintactico" />
+            <Button mnemonicParsing="false" text="Semantico" />
+            <Button mnemonicParsing="false" text="Compilar" />
             </items>
          <opaqueInsets>
             <Insets />
@@ -166,6 +170,8 @@
                 <Label text="Progress:" />
             <Pane prefHeight="25.0" prefWidth="13.0" />
             <Label fx:id="labelContentProgress" />
+            <Pane prefHeight="200.0" prefWidth="200.0" />
+            <Label fx:id="labelcolumRow" />
             </children>
         </HBox>
     </children>

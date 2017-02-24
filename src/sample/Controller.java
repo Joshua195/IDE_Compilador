@@ -2,30 +2,24 @@ package sample;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import model.Archivo;
-
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.StringJoiner;
 
 public class Controller {
 
     @FXML
     MenuItem menuItemNew;
-
+    @FXML
+    private MenuItem menuItemClose;
     @FXML
     MenuItem menuItemOpen;
 
@@ -43,9 +37,6 @@ public class Controller {
 
     @FXML
     Button buttonOpen;
-
-//    @FXML
-//    TabPane tabPaneCode;
     @FXML
     TextArea textAreaCode;
     @FXML
@@ -61,6 +52,9 @@ public class Controller {
     @FXML
     ListView<Archivo> historyFiles;
     private ObservableList<Archivo> observableListFileData = FXCollections.observableArrayList();
+
+    @FXML
+    private Label labelcolumRow;
 
 /*
 Salidas
@@ -84,12 +78,14 @@ Salidas
 
     private String fileActive;
 
+
+
     @FXML
     private void initialize() {
+        fileActive = "";
         initEvents();
         initButtons();
         initList();
-        test();
     }
 
     private void initEvents(){
@@ -100,8 +96,12 @@ Salidas
         buttonSave.setOnAction(event -> saveFile());
         buttonOpen.setOnAction(event -> openFile());
         textAreaCode.setOnKeyTyped(event -> countChar());
-
+        textAreaCode.setOnKeyReleased(event -> counter());
+        textAreaCode.setOnMouseClicked(event -> counter());
         historyFiles.setOnMouseClicked(event -> openListViewItem(historyFiles.getSelectionModel().getSelectedItem()));
+        textAreaCode.scrollTopProperty().bindBidirectional(textAreaCountLines.scrollTopProperty());
+        menuItemSaveAs.setOnAction(event -> saveAsFile());
+        menuItemClose.setOnAction(event -> Main.mainStage.close());
     }
 
     private void initButtons(){
@@ -115,40 +115,74 @@ Salidas
         buttonSave.setGraphic(new ImageView(imageSaveFile));
     }
 
-    private void newFile(){
+    private void newFile() {
+        if (fileActive.equals("new")) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Archivo...");
+            alert.setHeaderText(null);
+            alert.setContentText("Archivo no guardado ¿Deseas Guardarlo?");
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == ButtonType.OK) {
+                saveAsFile();
+            } else {
+                activateTextCode();
+            }
+        }else {
+            activateTextCode();
+        }
+    }
+
+    private void activateTextCode(){
+        textAreaCode.setDisable(false);
+        textAreaCode.requestFocus();
+        textAreaCode.setText("");
+        countChar();
+        fileActive = "new";
+    }
+
+    private void saveFile(){
+        if (fileActive.equals("new")){
+            saveAsFile();
+        }else {
+            for (Archivo archivo : observableListFileData) {
+                if (archivo.getName().equals(fileActive)) {
+                    File file = new File(archivo.getLocation());
+                    String code = textAreaCode.getText();
+                    BufferedWriter bufferedWriter;
+                    try {
+                        bufferedWriter = new BufferedWriter(new FileWriter(file));
+                        bufferedWriter.write(code);
+                        bufferedWriter.close();
+                        labelContentProgress.setText("Archivo guardado");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    private void saveAsFile(){
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("New File...");
+        fileChooser.setTitle("Save...");
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("RJ", "*.rj")
         );
         File file = fileChooser.showSaveDialog(Main.mainStage);
-        if (file != null){
-            Archivo archivo = new Archivo(file.getName(),file.getAbsolutePath());
-            System.out.println("Name of file: " + archivo.getName());
-            System.out.println("Route File: " + archivo.getLocation());
-            labelContentStatus.setText("Archivo actual -> " + archivo.getName());
-            fileActive = archivo.getName();
+        String code = textAreaCode.getText();
+        BufferedWriter bufferedWriter;
+        try {
+            Archivo archivo = new Archivo(file.getName(), file.getAbsolutePath());
+            bufferedWriter = new BufferedWriter(new FileWriter(file));
+            bufferedWriter.write(code);
+            bufferedWriter.close();
+            labelContentProgress.setText("Archivo Guardado...");
             observableListFileData.add(archivo);
-            textAreaCode.setDisable(false);
-            textAreaCode.requestFocus();
-        }
-    }
-
-    private void saveFile(){
-        for (Archivo archivo : observableListFileData) {
-            if (archivo.getName().equals(fileActive)) {
-                File file = new File(archivo.getLocation());
-                String code = textAreaCode.getText();
-                BufferedWriter bufferedWriter;
-                try {
-                    bufferedWriter = new BufferedWriter(new FileWriter(file));
-                    bufferedWriter.write(code);
-                    bufferedWriter.close();
-                    labelContentProgress.setText("Archivo guardado");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            fileActive = archivo.getName();
+            labelContentStatus.setText("Archivo actual -> " + archivo.getName());
+            buttonSave.setDisable(false);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -178,6 +212,8 @@ Salidas
                     }
                 }
                 labelContentWord.setText(String.valueOf(code.length()));
+                countChar();    //Adición
+                historyFiles.getSelectionModel().select(observableListFileData.size()-1); //Adición para focus
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -221,17 +257,13 @@ Salidas
                 fileActive = archivo.getName();
                 labelContentStatus.setText("Archivo actual -> " + archivo.getName());
                 labelContentWord.setText(String.valueOf(code.length()));
+                countChar();    //Adición
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }else {
             error();
         }
-    }
-
-    private void test(){
-//        textAreaCountLines.scrollTopProperty().bindBidirectional(textAreaCode.scrollTopProperty());
-        textAreaCode.scrollTopProperty().bindBidirectional(textAreaCountLines.scrollTopProperty());
     }
 
     private int countLines(){
@@ -243,5 +275,53 @@ Salidas
             }
         }
         return count + 1;
+    }
+
+    /* Cuenta el numero de renglones y los guarda en un Arraylist<String> */
+    private void counter(){
+        ArrayList<String> arrayList = new ArrayList<>();
+        String text = textAreaCode.getText();
+        String linea = "";
+        for (int  i = 0; i < text.length(); i++){
+            if (text.charAt(i) != '\n'){
+                linea += text.charAt(i);
+            }else{
+                arrayList.add(linea);
+                linea = "";
+            }
+        }
+        arrayList.add(linea);
+        coordinates(arrayList);
+    }
+
+    private void check(ArrayList<String> array){
+        System.out.println("Numero de renglones: " + array.size());
+        for (int i = 0; i < array.size(); i++){
+            System.out.println((i+1) + ": " + array.get(i));
+        }
+    }
+
+    private void coordinates(ArrayList<String> renglones){
+        int x = 0;
+        int filas = 1;
+        int caret = textAreaCode.getCaretPosition();
+//        System.out.println("Caret: " + caret);
+
+        int i = 0; // Para recorrer el arrayList
+        while(caret >= 0){  // Mientras la posicion actual aún no se alcance (-1 es condición de paro)
+            String renglon = renglones.get(i);  // Trabajamos con renglon.length actúal
+            if(renglon.length() < caret){   //Si el renglon es menor al caret, la el cursor no está aquí aún
+                caret -= (renglon.length()+1);
+                filas++;
+            }else if(renglon.length()-caret == 0){ //El cursor está aqui, y está en x = 0
+                x = caret;  // x = 0
+                caret = -1; // Detenemos while
+            }else{ // Si el renglon es mayor al caret, entonces el caret está en este renglon, y está en lo que resta del caret
+                x = caret;
+                caret = -1; //Detenemos while
+            }
+            i++;
+        }
+        labelcolumRow.setText(filas + ":" + x);
     }
 }

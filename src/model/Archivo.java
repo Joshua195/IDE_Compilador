@@ -5,10 +5,13 @@ public class Archivo {
     private String name;
     private String location;
     private boolean status;
+    private boolean saveStatus;
 
     public Archivo(String name, String location) {
         this.name = name;
         this.location = location;
+        saveStatus = false;
+        status = false;
     }
 
     public String getName() {
@@ -33,6 +36,14 @@ public class Archivo {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public boolean isSaveStatus() {
+        return saveStatus;
+    }
+
+    public void setSaveStatus(boolean saveStatus) {
+        this.saveStatus = saveStatus;
     }
 
     @Override
