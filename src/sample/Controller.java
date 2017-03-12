@@ -6,8 +6,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import model.Archivo;
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.CodeArea;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -37,10 +41,10 @@ public class Controller {
 
     @FXML
     Button buttonOpen;
-    @FXML
-    TextArea textAreaCode;
-    @FXML
-    TextArea textAreaCountLines;
+//    @FXML
+//    TextArea textAreaCode;
+//    @FXML
+//    TextArea textAreaCountLines;
 
     @FXML
     Label labelContentStatus;
@@ -78,14 +82,26 @@ Salidas
 
     private String fileActive;
 
+    private CodeArea textAreaCode;
+    @FXML
+    private StackPane stackPane;
+
 
 
     @FXML
     private void initialize() {
         fileActive = "";
+        initAreaCode();
         initEvents();
         initButtons();
         initList();
+    }
+
+    private void initAreaCode(){
+        CodeAreaControl codeAreaControl = new CodeAreaControl();
+        textAreaCode = codeAreaControl.getCodeArea();
+        textAreaCode.setDisable(true);
+        stackPane.getChildren().add(new VirtualizedScrollPane<>(textAreaCode));
     }
 
     private void initEvents(){
@@ -99,7 +115,6 @@ Salidas
         textAreaCode.setOnKeyReleased(event -> counter());
         textAreaCode.setOnMouseClicked(event -> counter());
         historyFiles.setOnMouseClicked(event -> openListViewItem(historyFiles.getSelectionModel().getSelectedItem()));
-        textAreaCode.scrollTopProperty().bindBidirectional(textAreaCountLines.scrollTopProperty());
         menuItemSaveAs.setOnAction(event -> saveAsFile());
         menuItemClose.setOnAction(event -> Main.mainStage.close());
     }
@@ -135,7 +150,7 @@ Salidas
     private void activateTextCode(){
         textAreaCode.setDisable(false);
         textAreaCode.requestFocus();
-        textAreaCode.setText("");
+        textAreaCode.replaceText("");
         countChar();
         fileActive = "new";
     }
@@ -197,7 +212,7 @@ Salidas
             Archivo archivo = new Archivo(file.getName(), file.getAbsolutePath());
             try {
                 String code = new String(Files.readAllBytes(Paths.get(archivo.getLocation())));
-                textAreaCode.setText(code);
+                textAreaCode.replaceText(code);
                 textAreaCode.requestFocus();
                 textAreaCode.setDisable(false);
                 fileActive = archivo.getName();
@@ -231,11 +246,6 @@ Salidas
         }else {
             labelContentWord.setText("0");
         }
-        String lines = "";
-        for (int i = 1; i < countLines() + 1; i++){
-            lines += i + "\n";
-        }
-        textAreaCountLines.setText(lines);
     }
 
     private void error(){
@@ -251,7 +261,7 @@ Salidas
         if (file.exists()){
             try {
                 String code = new String(Files.readAllBytes(Paths.get(archivo.getLocation())));
-                textAreaCode.setText(code);
+                textAreaCode.replaceText(code);
                 textAreaCode.requestFocus();
                 textAreaCode.setDisable(false);
                 fileActive = archivo.getName();

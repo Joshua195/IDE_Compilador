@@ -16,7 +16,9 @@ public class Main extends Application {
         Main.mainStage = primaryStage;
         primaryStage.setTitle("IDE: J-Developer");
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("logo.png")));
-        primaryStage.setScene(new Scene(root));
+        Scene mainScene = new Scene(root);
+        mainScene.getStylesheets().add(Main.class.getResource("style.css").toExternalForm());
+        primaryStage.setScene(mainScene);
         primaryStage.show();
     }
 
