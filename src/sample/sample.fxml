@@ -58,7 +58,7 @@
                 <Button fx:id="buttonNew" mnemonicParsing="false" />
                 <Button fx:id="buttonOpen" mnemonicParsing="false" />
                 <Button fx:id="buttonSave" mnemonicParsing="false" />
-            <Button mnemonicParsing="false" text="Lexico" />
+            <Button fx:id="buttonLexico" mnemonicParsing="false" text="Lexico" />
             <Button mnemonicParsing="false" text="Sintactico" />
             <Button mnemonicParsing="false" text="Semantico" />
             <Button mnemonicParsing="false" text="Compilar" />

@@ -16,6 +16,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Controller {
@@ -41,11 +42,8 @@ public class Controller {
 
     @FXML
     Button buttonOpen;
-//    @FXML
-//    TextArea textAreaCode;
-//    @FXML
-//    TextArea textAreaCountLines;
-
+    @FXML
+    private Button buttonLexico;
     @FXML
     Label labelContentStatus;
     @FXML
@@ -80,7 +78,7 @@ Salidas
 
 /******************/
 
-    private String fileActive;
+    private Archivo fileActive;
 
     private CodeArea textAreaCode;
     @FXML
@@ -90,7 +88,7 @@ Salidas
 
     @FXML
     private void initialize() {
-        fileActive = "";
+        fileActive = new Archivo("new","");
         initAreaCode();
         initEvents();
         initButtons();
@@ -117,6 +115,7 @@ Salidas
         historyFiles.setOnMouseClicked(event -> openListViewItem(historyFiles.getSelectionModel().getSelectedItem()));
         menuItemSaveAs.setOnAction(event -> saveAsFile());
         menuItemClose.setOnAction(event -> Main.mainStage.close());
+        buttonLexico.setOnAction(event -> initLexico());
     }
 
     private void initButtons(){
@@ -131,7 +130,7 @@ Salidas
     }
 
     private void newFile() {
-        if (fileActive.equals("new")) {
+        if (fileActive.getName().equals("new")) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Archivo...");
             alert.setHeaderText(null);
@@ -152,15 +151,16 @@ Salidas
         textAreaCode.requestFocus();
         textAreaCode.replaceText("");
         countChar();
-        fileActive = "new";
+        fileActive.setName("new");
     }
 
     private void saveFile(){
-        if (fileActive.equals("new")){
+        if (fileActive.getName().equals("new")){
             saveAsFile();
         }else {
-            for (Archivo archivo : observableListFileData) {
-                if (archivo.getName().equals(fileActive)) {
+            Archivo archivo = observableListFileData.get(observableListFileData.indexOf(fileActive));
+//            for (Archivo archivo : observableListFileData) {
+//                if (archivo.getName().equals(fileActive)) {
                     File file = new File(archivo.getLocation());
                     String code = textAreaCode.getText();
                     BufferedWriter bufferedWriter;
@@ -173,8 +173,8 @@ Salidas
                         e.printStackTrace();
                     }
                 }
-            }
-        }
+//            }
+//        }
     }
 
     private void saveAsFile(){
@@ -193,7 +193,7 @@ Salidas
             bufferedWriter.close();
             labelContentProgress.setText("Archivo Guardado...");
             observableListFileData.add(archivo);
-            fileActive = archivo.getName();
+            fileActive = archivo;
             labelContentStatus.setText("Archivo actual -> " + archivo.getName());
             buttonSave.setDisable(false);
         } catch (IOException e) {
@@ -215,7 +215,7 @@ Salidas
                 textAreaCode.replaceText(code);
                 textAreaCode.requestFocus();
                 textAreaCode.setDisable(false);
-                fileActive = archivo.getName();
+                fileActive = archivo;
                 labelContentStatus.setText("Archivo actual -> " + archivo.getName());
                 if (observableListFileData.size() == 0) {
                     observableListFileData.add(archivo);
@@ -264,7 +264,7 @@ Salidas
                 textAreaCode.replaceText(code);
                 textAreaCode.requestFocus();
                 textAreaCode.setDisable(false);
-                fileActive = archivo.getName();
+                fileActive = archivo;
                 labelContentStatus.setText("Archivo actual -> " + archivo.getName());
                 labelContentWord.setText(String.valueOf(code.length()));
                 countChar();    //Adición
@@ -333,5 +333,42 @@ Salidas
             i++;
         }
         labelcolumRow.setText(filas + ":" + x);
+    }
+
+    private void initLexico(){
+        if (fileActive.getName().equals("new")){
+            saveAsFile();
+        }else {
+            Process process = null;
+            try {
+                List<String> command = new ArrayList<>();
+                command.add("python");
+                command.add("D:\\PycharmProjects\\untitled\\Test.py");
+                command.add("\"" + fileActive.getLocation() + "\"");
+                ProcessBuilder pb = new ProcessBuilder(command);
+                process = pb.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            assert process != null;
+            textAreaLexico.setText(output(process.getInputStream()));
+        }
+    }
+
+    private static String output(InputStream inputStream){
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append(System.getProperty("line.separator"));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
+    }
+
+    private void setEnableButtons(boolean status){
+        buttonLexico.setDisable(status);
     }
 }

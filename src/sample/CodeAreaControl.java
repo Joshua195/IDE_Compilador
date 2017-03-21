@@ -14,7 +14,7 @@ public class CodeAreaControl {
 
     private static final String[] KEYWORDS = new String[] {
             "main","if","then","else","end","do","while","repeat",
-            "until","cin","cout","real","int","boolean", "string"
+            "until","cin","cout","real","int","boolean"
     };
 
     private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
@@ -39,7 +39,7 @@ public class CodeAreaControl {
 
     private CodeArea codeArea;
 
-    public CodeAreaControl() {
+    CodeAreaControl() {
         codeArea = new CodeArea();
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
 
@@ -48,7 +48,6 @@ public class CodeAreaControl {
                 .subscribe(change -> {
                     codeArea.setStyleSpans(0, computeHighlighting(codeArea.getText()));
                 });
-//        codeArea.replaceText(0, 0, "");
     }
 
     private static StyleSpans<Collection<String>> computeHighlighting(String text) {
