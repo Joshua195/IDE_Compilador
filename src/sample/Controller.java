@@ -1,14 +1,18 @@
 package sample;
 
+import com.oracle.webservices.internal.api.message.PropertySet;
+import com.sun.xml.internal.ws.api.FeatureConstructor;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import model.Archivo;
+import model.Token;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 
@@ -84,6 +88,18 @@ Salidas
     @FXML
     private StackPane stackPane;
 
+    @FXML
+    private TableColumn tableColumnType;
+    @FXML
+    private TableColumn tableColumnLexema;
+    @FXML
+    private TableColumn tableColumnRow;
+    @FXML
+    private TableColumn tableColumnColumn;
+    @FXML
+    private TableView<Token> tokenTableView;
+    private ObservableList<Token> tokenObservableList = FXCollections.observableArrayList();
+
 
 
     @FXML
@@ -93,6 +109,7 @@ Salidas
         initEvents();
         initButtons();
         initList();
+        initColumns();
     }
 
     private void initAreaCode(){
@@ -100,6 +117,13 @@ Salidas
         textAreaCode = codeAreaControl.getCodeArea();
         textAreaCode.setDisable(true);
         stackPane.getChildren().add(new VirtualizedScrollPane<>(textAreaCode));
+    }
+
+    private void initColumns(){
+        tableColumnType.setCellValueFactory(new PropertyValueFactory<Token,String>("type"));
+        tableColumnLexema.setCellValueFactory(new PropertyValueFactory<Token, String>("lexema"));
+        tableColumnRow.setCellValueFactory(new PropertyValueFactory<Token,String>("row"));
+        tableColumnColumn.setCellValueFactory(new PropertyValueFactory<Token, String>("column"));
     }
 
     private void initEvents(){
@@ -336,6 +360,7 @@ Salidas
     }
 
     private void initLexico(){
+        tokenObservableList.clear();
         if (fileActive.getName().equals("new")){
             saveAsFile();
         }else {
@@ -351,21 +376,27 @@ Salidas
                 e.printStackTrace();
             }
             assert process != null;
-            textAreaLexico.setText(output(process.getInputStream()));
+            List<Token> tokens = output(process.getInputStream());
+            tokenObservableList.addAll(tokens);
+            tokenTableView.setItems(tokenObservableList);
         }
     }
 
-    private static String output(InputStream inputStream){
+    private List<Token> output(InputStream inputStream){
         StringBuilder sb = new StringBuilder();
+        List<Token> tokens = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line).append(System.getProperty("line.separator"));
+                String lineToken[] = line.split("#");
+                Token token = new Token(lineToken[0],lineToken[1],lineToken[2],lineToken[3]);
+                tokens.add(token);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return sb.toString();
+        return tokens;
     }
 
     private void setEnableButtons(boolean status){
