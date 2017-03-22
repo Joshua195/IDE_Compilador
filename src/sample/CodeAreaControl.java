@@ -23,12 +23,14 @@ public class CodeAreaControl {
     private static final String BRACKET_PATTERN = "\\[|\\]";
     private static final String SEMICOLON_PATTERN = "\\;";
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
-    private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
+    private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*[\n]*?/";
     private static final String NUMBER_PATTERN = "(\\d+(?:\\.\\d+)?)";
+    private static final String ID_PATTERN = "[A-Za-z]([A-Za-z]|[0-9]|_)*";
 
     private static final Pattern PATTERN = Pattern.compile(
-            "(?<KEYWORD>" + KEYWORD_PATTERN + ")"
+                      "(?<KEYWORD>" + KEYWORD_PATTERN + ")"
                     + "|(?<PAREN>" + PAREN_PATTERN + ")"
+                    + "|(?<ID>" + ID_PATTERN + ")"
                     + "|(?<BRACE>" + BRACE_PATTERN + ")"
                     + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
                     + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"

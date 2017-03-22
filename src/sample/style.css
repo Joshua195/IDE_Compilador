@@ -2,6 +2,7 @@
 .keyword {
     -fx-fill: #3366ff;
     -fx-font-weight: bold;
+    -fx-underline: true;
 }
 
 .semicolon {

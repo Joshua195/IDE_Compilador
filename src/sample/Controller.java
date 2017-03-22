@@ -1,7 +1,5 @@
 package sample;
 
-import com.oracle.webservices.internal.api.message.PropertySet;
-import com.sun.xml.internal.ws.api.FeatureConstructor;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -66,8 +64,6 @@ public class Controller {
 Salidas
  */
     @FXML
-    private TextArea textAreaLexico;
-    @FXML
     private TextArea textAreaSintactico;
     @FXML
     private TextArea textAreaSemantico;
@@ -104,7 +100,7 @@ Salidas
 
     @FXML
     private void initialize() {
-        fileActive = new Archivo("new","");
+        fileActive = new Archivo("","");
         initAreaCode();
         initEvents();
         initButtons();
@@ -139,7 +135,7 @@ Salidas
         historyFiles.setOnMouseClicked(event -> openListViewItem(historyFiles.getSelectionModel().getSelectedItem()));
         menuItemSaveAs.setOnAction(event -> saveAsFile());
         menuItemClose.setOnAction(event -> Main.mainStage.close());
-        buttonLexico.setOnAction(event -> initLexico());
+        buttonLexico.setOnAction(event -> initLexicon());
     }
 
     private void initButtons(){
@@ -154,6 +150,7 @@ Salidas
     }
 
     private void newFile() {
+        tokenObservableList.clear();
         if (fileActive.getName().equals("new")) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Archivo...");
@@ -178,27 +175,23 @@ Salidas
         fileActive.setName("new");
     }
 
-    private void saveFile(){
-        if (fileActive.getName().equals("new")){
+    private void saveFile() {
+        if (fileActive.getName().equals("new")) {
             saveAsFile();
-        }else {
+        } else {
             Archivo archivo = observableListFileData.get(observableListFileData.indexOf(fileActive));
-//            for (Archivo archivo : observableListFileData) {
-//                if (archivo.getName().equals(fileActive)) {
-                    File file = new File(archivo.getLocation());
-                    String code = textAreaCode.getText();
-                    BufferedWriter bufferedWriter;
-                    try {
-                        bufferedWriter = new BufferedWriter(new FileWriter(file));
-                        bufferedWriter.write(code);
-                        bufferedWriter.close();
-                        labelContentProgress.setText("Archivo guardado");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-//            }
-//        }
+            File file = new File(archivo.getLocation());
+            String code = textAreaCode.getText();
+            BufferedWriter bufferedWriter;
+            try {
+                bufferedWriter = new BufferedWriter(new FileWriter(file));
+                bufferedWriter.write(code);
+                bufferedWriter.close();
+                labelContentProgress.setText("Archivo guardado");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void saveAsFile(){
@@ -226,6 +219,7 @@ Salidas
     }
 
     private void openFile(){
+        tokenObservableList.clear();
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open...");
         fileChooser.getExtensionFilters().addAll(
@@ -281,6 +275,7 @@ Salidas
     }
 
     private void openListViewItem(Archivo archivo){
+        tokenObservableList.clear();
         File file = new File(archivo.getLocation());
         if (file.exists()){
             try {
@@ -359,7 +354,7 @@ Salidas
         labelcolumRow.setText(filas + ":" + x);
     }
 
-    private void initLexico(){
+    private void initLexicon(){
         tokenObservableList.clear();
         if (fileActive.getName().equals("new")){
             saveAsFile();
@@ -368,7 +363,7 @@ Salidas
             try {
                 List<String> command = new ArrayList<>();
                 command.add("python");
-                command.add("D:\\PycharmProjects\\untitled\\Test.py");
+                command.add("E:\\Usuarios\\Joshua\\PycharmProjects\\Test\\Test.py");
                 command.add("\"" + fileActive.getLocation() + "\"");
                 ProcessBuilder pb = new ProcessBuilder(command);
                 process = pb.start();
