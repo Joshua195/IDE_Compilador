@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
@@ -17,6 +18,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Controller {
 
@@ -82,17 +84,17 @@ public class Controller {
     @FXML
     private StackPane stackPane;
 
-//    @FXML
-//    private TableColumn tableColumnType;
-//    @FXML
-//    private TableColumn tableColumnLexema;
-//    @FXML
-//    private TableColumn tableColumnRow;
-//    @FXML
-//    private TableColumn tableColumnColumn;
-//    @FXML
-//    private TableView<Token> tokenTableView;
-//    private ObservableList<Token> tokenObservableList = FXCollections.observableArrayList();
+    @FXML
+    private TableColumn tableColumnType;
+    @FXML
+    private TableColumn tableColumnLexema;
+    @FXML
+    private TableColumn tableColumnRow;
+    @FXML
+    private TableColumn tableColumnColumn;
+    @FXML
+    private TableView<Token> tokenTableView;
+    private ObservableList<Token> tokenObservableList = FXCollections.observableArrayList();
 
 
 
@@ -103,7 +105,7 @@ public class Controller {
         initEvents();
         initButtons();
         initList();
-//        initColumns();
+        initColumns();
     }
 
     private void initAreaCode(){
@@ -113,12 +115,12 @@ public class Controller {
         stackPane.getChildren().add(new VirtualizedScrollPane<>(textAreaCode));
     }
 
-//    private void initColumns(){
-//        tableColumnType.setCellValueFactory(new PropertyValueFactory<Token,String>("type"));
-//        tableColumnLexema.setCellValueFactory(new PropertyValueFactory<Token, String>("lexema"));
-//        tableColumnRow.setCellValueFactory(new PropertyValueFactory<Token,String>("row"));
-//        tableColumnColumn.setCellValueFactory(new PropertyValueFactory<Token, String>("column"));
-//    }
+    private void initColumns(){
+        tableColumnType.setCellValueFactory(new PropertyValueFactory<Token,String>("type"));
+        tableColumnLexema.setCellValueFactory(new PropertyValueFactory<Token, String>("lexema"));
+        tableColumnRow.setCellValueFactory(new PropertyValueFactory<Token,String>("row"));
+        tableColumnColumn.setCellValueFactory(new PropertyValueFactory<Token, String>("column"));
+    }
 
     private void initEvents(){
         menuItemNew.setOnAction(event -> newFile());
@@ -148,7 +150,7 @@ public class Controller {
     }
 
     private void newFile() {
-//        tokenObservableList.clear();
+        clean();
         if (fileActive.getName().equals("new")) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Archivo...");
@@ -217,8 +219,7 @@ public class Controller {
     }
 
     private void openFile(){
-        textAreaErrores.setText("");
-        textAreaLexico.setText("");
+        clean();
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open...");
         fileChooser.getExtensionFilters().addAll(
@@ -274,8 +275,7 @@ public class Controller {
     }
 
     private void openListViewItem(Archivo archivo){
-        textAreaErrores.setText("");
-        textAreaLexico.setText("");
+        clean();
         File file = new File(archivo.getLocation());
         if (file.exists()){
             try {
@@ -295,17 +295,6 @@ public class Controller {
         }
     }
 
-    private int countLines(){
-        String text = textAreaCode.getText();
-        int count = 0;
-        for (int  i = 0; i < text.length(); i++){
-            if (text.charAt(i) == '\n'){
-                count++;
-            }
-        }
-        return count + 1;
-    }
-
     /* Cuenta el numero de renglones y los guarda en un Arraylist<String> */
     private void counter(){
         ArrayList<String> arrayList = new ArrayList<>();
@@ -321,13 +310,6 @@ public class Controller {
         }
         arrayList.add(linea);
         coordinates(arrayList);
-    }
-
-    private void check(ArrayList<String> array){
-        System.out.println("Numero de renglones: " + array.size());
-        for (int i = 0; i < array.size(); i++){
-            System.out.println((i+1) + ": " + array.get(i));
-        }
     }
 
     private void coordinates(ArrayList<String> renglones){
@@ -355,106 +337,49 @@ public class Controller {
     }
 
     private void initLexicon(){
-        textAreaErrores.setText("");
-        textAreaLexico.setText("");
-        if (fileActive.getName().equals("new")){
+        clean();
+        if(fileActive.getName().equals("new")){
             saveAsFile();
         }else {
-            Process process = null;
-            try {
-//                List<String> command = new ArrayList<>();
-//                command.add("python");
-//                command.add("D:\\PycharmProjects\\untitled\\Test.py");
-//                command.add("D:\\PycharmProjects\\Lexico\\Lexico.py");
-//                command.add("\"" + fileActive.getLocation() + "\"");
-//                ProcessBuilder pb = new ProcessBuilder(command);
-//                process = pb.start();
-                String te = "python";
-                String te2= " D:\\Documents\\lexico_r\\Lexico\\Lexico.py ";
-                String fileLocation = "\"" + fileActive.getLocation() + "\"";
-                System.out.println(fileActive.getLocation());
-                Process process1 = Runtime.getRuntime().exec(te + te2 + fileLocation);
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            String file = "\"" + fileActive.getLocation() + "\"";
+            List<String> list = executeLexico(file);
+            ArrayList<Token> tokensValidos = new ArrayList<>();
+            ArrayList<Token> tokensError = new ArrayList<>();
+            for (String line : list) {
+                if (!line.contains("TKN_ERROR")) {
+                    String[] desc = line.split(" ");
+                    tokensValidos.add(new Token(desc[0], desc[1], desc[2], desc[3]));
+                } else {
+                    String[] desc = line.split(" ");
+                    tokensError.add(new Token(desc[0], desc[1], desc[2], desc[3]));
                 }
-                String error = new String(Files.readAllBytes(Paths.get("D:\\Documents\\lexico_r\\Lexico\\Errores.txt")));
-                textAreaErrores.appendText(error);
-                String valido = new String(Files.readAllBytes(Paths.get("D:\\Documents\\lexico_r\\Lexico\\Output.txt")));
-                textAreaLexico.appendText(valido);
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-//            try {
-//                String error = new String(Files.readAllBytes(Paths.get("D:\\PycharmProjects\\Lexico\\Errores.txt")));
-//                textAreaErrores.appendText(error);
-//                String valido = new String(Files.readAllBytes(Paths.get("D:\\PycharmProjects\\Lexico\\Output.txt")));
-//                textAreaLexico.appendText(valido);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-
-//            String line;
-//            BufferedReader bufferedReader;
-//            try {
-//                bufferedReader = new BufferedReader(new FileReader("D:\\PycharmProjects\\Lexico\\Errores.txt"));
-//                List<Token> errores = new ArrayList<>();
-//                while ((line = bufferedReader.readLine()) != null){
-//                    String lineToken[] = line.split("#");
-//                    Token token = new Token(lineToken[2],lineToken[3],lineToken[0],lineToken[1]);
-//                    errores.add(token);
-//                }
-//                BufferedReader bufferedReader1 = new BufferedReader(new FileReader("D:\\PycharmProjects\\Lexico\\Output.txt"));
-//                List<Token> validos = new ArrayList<>();
-//                while ((line = bufferedReader1.readLine()) != null){
-//                    String lineToken[] = line.split("#");
-//                    Token token = new Token(lineToken[2],lineToken[3],lineToken[0],lineToken[1]);
-//                    validos.add(token);
-//                }
-//
-//                for (Token token : errores){
-//                    textAreaErrores.appendText(token + "\n");
-//                }
-//
-//                tokenObservableList.addAll(validos);
-//                tokenTableView.setItems(tokenObservableList);
-//            }catch (Exception e){
-//                e.printStackTrace();
-//            }
-//            List<Token> all = output(process.getInputStream());
-//            List<Token> valido = new ArrayList<>();
-//            List<Token> error = new ArrayList<>();
-//            for (Token token : all){
-//                if (token.getType().equals("Error")){
-//                    error.add(token);
-//                }else {
-//                    valido.add(token);
-//                }
-//            }
-//            tokenObservableList.addAll(valido);
-//            for (Token token : error){
-//                textAreaErrores.appendText(token + "\n");
-//            }
-//            tokenTableView.setItems(tokenObservableList);
+            for (Token token : tokensError){
+                textAreaErrores.appendText(token.toString());
+            }
+            tokenObservableList.addAll(tokensValidos);
+            tokenTableView.setItems(tokenObservableList);
         }
     }
 
-    private List<Token> output(InputStream inputStream){
-        StringBuilder sb = new StringBuilder();
-        List<Token> tokens = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line).append(System.getProperty("line.separator"));
-                System.out.println(br.readLine());
-                String lineToken[] = line.split("#");
-                Token token = new Token(lineToken[2],lineToken[3],lineToken[0],lineToken[1]);
-                tokens.add(token);
+    private List<String> executeLexico (String pathFile){
+        try {
+            String script = "E:\\Usuarios\\Joshua\\Documents\\UAA\\Compiladores\\Compilador\\Lexico.py";
+            ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
+            Process process  = processBuilder.start();
+            process.waitFor();
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))){
+                return bufferedReader.lines().collect(Collectors.toList());
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-        return tokens;
+        return null;
     }
+
+    private void clean(){
+        tokenObservableList.clear();
+        textAreaErrores.setText("");
+    }
+
 }

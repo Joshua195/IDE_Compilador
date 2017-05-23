@@ -6,7 +6,7 @@ public class Token {
     private String row;
     private String column;
 
-    public Token(String type, String lexema, String row, String column) {
+    public Token(String row, String column, String type, String lexema) {
         this.type = type;
         this.lexema = lexema;
         this.row = row;
