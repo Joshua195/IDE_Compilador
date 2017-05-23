@@ -46,6 +46,8 @@ public class Controller {
     @FXML
     private Button buttonLexico;
     @FXML
+    private Button buttonSintactico;
+    @FXML
     Label labelContentStatus;
     @FXML
     Label labelContentWord;
@@ -97,6 +99,12 @@ public class Controller {
     private ObservableList<Token> tokenObservableList = FXCollections.observableArrayList();
 
 
+    private TreeItem<String> root;
+    private int it = 0;  // Iterador
+    private ArrayList<String> line;
+    @FXML
+    private TreeView treeView;
+
 
     @FXML
     private void initialize() {
@@ -136,6 +144,7 @@ public class Controller {
         menuItemSaveAs.setOnAction(event -> saveAsFile());
         menuItemClose.setOnAction(event -> Main.mainStage.close());
         buttonLexico.setOnAction(event -> initLexicon());
+        buttonSintactico.setOnAction(event -> initSintactico());
     }
 
     private void initButtons(){
@@ -380,6 +389,77 @@ public class Controller {
     private void clean(){
         tokenObservableList.clear();
         textAreaErrores.setText("");
+    }
+
+    private void initSintactico(){
+        File file = new File("Tokens.txt");
+        List<String> result = executeSintactico(file.getAbsolutePath());
+        ArrayList<String> resultNoErrors = new ArrayList<>();
+        for (String line : result){
+            if (!line.contains("Syntax error")){
+                resultNoErrors.add(line);
+            }
+        }
+        line = resultNoErrors;
+        save_tree();
+        treeView.setRoot(root);
+    }
+
+    private List<String> executeSintactico(String pathFile){
+        try{
+            String script = "";
+            ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
+            Process process = processBuilder.start();
+            process.waitFor();
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))){
+                return bufferedReader.lines().collect(Collectors.toList());
+            }
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void save_tree(){
+        root = new TreeItem<String>(line.get(it));
+        it++;
+        get_Tree(0, root);
+    }
+
+    private void get_Tree(int prevTab, TreeItem<String> root){
+        // Contamos el numero de Tabulaciones que tiene la linea
+        while (it < line.size()){
+            int tabs = count_tabs(line.get(it));
+            if (tabs > prevTab){  // Si es hijo
+                String [] token = line.get(it).split(" ");
+                root.getChildren().add(new TreeItem<>(token[token.length-1]));  // El ultimo del split será el token
+                it++;
+                get_Tree(tabs, root.getChildren().get(root.getChildren().size()-1));  // El ultimo agregado
+            }else{
+                break;
+            }
+        }
+    }
+
+    private int count_tabs(String linea){
+        int contador = 0;
+        for (int i = 0; i < linea.length(); i++){
+            if (linea.charAt(i) == ' ')
+                contador++;
+        }
+        // Al no poder hacer split('\t'), contamos los (espaciosTotales+1)/4
+        if (contador > 0){
+            contador++;
+            contador /= 4;
+        }
+        char [] test = linea.toCharArray();
+        int testing = 0;
+        for (char c : test){
+            if (c == '\t'){
+                testing++;
+            }
+        }
+        return testing;
     }
 
 }
