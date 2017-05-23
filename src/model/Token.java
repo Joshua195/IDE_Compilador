@@ -44,4 +44,14 @@ public class Token {
     public void setColumn(String column) {
         this.column = column;
     }
+
+    @Override
+    public String toString() {
+        return "Token{" +
+                "type='" + type + '\'' +
+                ", lexema='" + lexema + '\'' +
+                ", row='" + row + '\'' +
+                ", column='" + column + '\'' +
+                '}';
+    }
 }

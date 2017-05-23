@@ -23,7 +23,8 @@ public class CodeAreaControl {
     private static final String BRACKET_PATTERN = "\\[|\\]";
     private static final String SEMICOLON_PATTERN = "\\;";
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
-    private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*[\n]*?/";
+    private static final String COMMENT_TEST = "(\\/\\*(.|[\\r\\n])*?[\\*\\/|.]?)$";
+    private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/" + "|" + COMMENT_TEST;
     private static final String NUMBER_PATTERN = "(\\d+(?:\\.\\d+)?)";
     private static final String ID_PATTERN = "[A-Za-z]([A-Za-z]|[0-9]|_)*";
 
@@ -36,7 +37,7 @@ public class CodeAreaControl {
                     + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
                     + "|(?<STRING>" + STRING_PATTERN + ")"
                     + "|(?<COMMENT>" + COMMENT_PATTERN + ")"
-                    + "|(?<NUMBER>" + NUMBER_PATTERN + ")"
+                    + "|(?<NUMBER>" + NUMBER_PATTERN + ")" + "|(?<TEST>" + COMMENT_TEST + ")"
     );
 
     private CodeArea codeArea;
@@ -48,7 +49,7 @@ public class CodeAreaControl {
         codeArea.richChanges()
                 .filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
                 .subscribe(change -> {
-                    codeArea.setStyleSpans(0, computeHighlighting(codeArea.getText()));
+                        codeArea.setStyleSpans(0, computeHighlighting(codeArea.getText()));
                 });
     }
 
@@ -67,14 +68,18 @@ public class CodeAreaControl {
                                                             matcher.group("STRING") != null ? "string" :
                                                                     matcher.group("COMMENT") != null ? "comment" :
                                                                             matcher.group("NUMBER") != null ? "number":
-                                                                                    null; /* never happens */ assert styleClass != null;
+                                                                                    matcher.group("TEST") != null ? "comment":
+                                                                                    null; assert styleClass != null;
             spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
             spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
             lastKwEnd = matcher.end();
         }
         spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
+
         return spansBuilder.create();
     }
+
+
 
     public CodeArea getCodeArea() {
         return codeArea;

@@ -2,7 +2,6 @@
 .keyword {
     -fx-fill: #3366ff;
     -fx-font-weight: bold;
-    -fx-underline: true;
 }
 
 .semicolon {
@@ -37,4 +36,10 @@
 
 .number{
     -fx-fill: #0000ff;
+}
+
+.error{
+    -fx-fill: red;
+    -fx-underline: true;
+    -fx-font-weight: bold;
 }
