@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public class CodeAreaControl {
 
     private static final String[] KEYWORDS = new String[] {
-            "main","if","then","else","end","do","while","repeat",
+            "main","if","then","else","end","while","repeat",
             "until","cin","cout","real","int","boolean"
     };
 

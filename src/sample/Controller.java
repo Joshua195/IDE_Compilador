@@ -373,14 +373,14 @@ public class Controller {
 
     private List<String> executeLexico (String pathFile){
         try {
-            String script = "E:\\Usuarios\\Joshua\\PycharmProjects\\Compiler_v3\\Lexico.py";
+            String script = "D:\\PycharmProjects\\Compiler_v3\\Lexico.py";
             ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
             Process process  = processBuilder.start();
-            process.waitFor();
+//            process.waitFor();
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))){
                 return bufferedReader.lines().collect(Collectors.toList());
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -420,10 +420,9 @@ public class Controller {
 
     private List<String> executeSintactico(String pathFile){
         try{
-            String script = "E:\\Usuarios\\Joshua\\PycharmProjects\\Compiler_v3\\Sintactico.py";
+            String script = "D:\\PycharmProjects\\Compiler_v3\\Sintactico.py";
             ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
             Process process = processBuilder.start();
-//            process.waitFor();
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))){
                 return bufferedReader.lines().collect(Collectors.toList());
             }
