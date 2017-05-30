@@ -373,7 +373,7 @@ public class Controller {
 
     private List<String> executeLexico (String pathFile){
         try {
-            String script = "E:\\Usuarios\\Joshua\\Documents\\UAA\\Compiladores\\Compilador\\Lexico.py";
+            String script = "E:\\Usuarios\\Joshua\\PycharmProjects\\Compiler_v3\\Lexico.py";
             ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
             Process process  = processBuilder.start();
             process.waitFor();
@@ -389,15 +389,28 @@ public class Controller {
     private void clean(){
         tokenObservableList.clear();
         textAreaErrores.setText("");
+        treeView.setRoot(new TreeItem("No Elements..."));
+        if (line != null) {
+            line.clear();
+            it = 0;
+        }
     }
 
     private void initSintactico(){
+        if (line != null){
+            line.clear();
+            it = 0;
+            root = null;
+        }
         File file = new File("Tokens.txt");
         List<String> result = executeSintactico(file.getAbsolutePath());
         ArrayList<String> resultNoErrors = new ArrayList<>();
+        ArrayList<String> error = new ArrayList<>();
         for (String line : result){
             if (!line.contains("Syntax error")){
                 resultNoErrors.add(line);
+            }else {
+                textAreaErrores.appendText("\n" + line);
             }
         }
         line = resultNoErrors;
@@ -407,14 +420,14 @@ public class Controller {
 
     private List<String> executeSintactico(String pathFile){
         try{
-            String script = "";
+            String script = "E:\\Usuarios\\Joshua\\PycharmProjects\\Compiler_v3\\Sintactico.py";
             ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
             Process process = processBuilder.start();
-            process.waitFor();
+//            process.waitFor();
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))){
                 return bufferedReader.lines().collect(Collectors.toList());
             }
-        } catch (InterruptedException | IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -422,6 +435,7 @@ public class Controller {
 
     private void save_tree(){
         root = new TreeItem<String>(line.get(it));
+        root.setExpanded(true);
         it++;
         get_Tree(0, root);
     }
@@ -452,14 +466,14 @@ public class Controller {
             contador++;
             contador /= 4;
         }
-        char [] test = linea.toCharArray();
-        int testing = 0;
-        for (char c : test){
-            if (c == '\t'){
-                testing++;
-            }
-        }
-        return testing;
+//        char [] test = linea.toCharArray();
+//        int testing = 0;
+//        for (char c : test){
+//            if (c == '\t'){
+//                testing++;
+//            }
+//        }
+        return contador;
     }
 
 }
