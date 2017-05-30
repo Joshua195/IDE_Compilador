@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Controller {
 
@@ -403,9 +404,9 @@ public class Controller {
             root = null;
         }
         File file = new File("Tokens.txt");
-        List<String> result = executeSintactico(file.getAbsolutePath());
+        List<String> novalid = executeSintactico(file.getAbsolutePath());
+        List<String> result = readTree();
         ArrayList<String> resultNoErrors = new ArrayList<>();
-        ArrayList<String> error = new ArrayList<>();
         for (String line : result){
             if (!line.contains("Syntax error")){
                 resultNoErrors.add(line);
@@ -416,6 +417,16 @@ public class Controller {
         line = resultNoErrors;
         save_tree();
         treeView.setRoot(root);
+    }
+
+    private List<String> readTree(){
+        List<String> result;
+        try(Stream<String> stream = Files.lines(Paths.get("Tree.txt"))){
+            return result = stream.collect(Collectors.toList());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private List<String> executeSintactico(String pathFile){
