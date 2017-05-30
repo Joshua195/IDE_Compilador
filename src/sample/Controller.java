@@ -364,7 +364,7 @@ public class Controller {
                 }
             }
             for (Token token : tokensError){
-                textAreaErrores.appendText(token.toString());
+                textAreaErrores.appendText(token.toString() + "\n");
             }
             tokenObservableList.addAll(tokensValidos);
             tokenTableView.setItems(tokenObservableList);
