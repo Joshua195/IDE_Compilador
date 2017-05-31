@@ -72,7 +72,9 @@ public class Controller {
     @FXML
     private TextArea textAreaCodigoIntermedio;
     @FXML
-    private TextArea textAreaErrores;
+    private TextArea textAreaErroresLexico;
+    @FXML
+    private TextArea textAreaErroresSintactico;
     @FXML
     private TextArea textAreaSalida;
     @FXML
@@ -365,7 +367,7 @@ public class Controller {
                 }
             }
             for (Token token : tokensError){
-                textAreaErrores.appendText(token.toString() + "\n");
+                textAreaErroresLexico.appendText(token.toString() + "\n");
             }
             tokenObservableList.addAll(tokensValidos);
             tokenTableView.setItems(tokenObservableList);
@@ -389,7 +391,8 @@ public class Controller {
 
     private void clean(){
         tokenObservableList.clear();
-        textAreaErrores.setText("");
+        textAreaErroresLexico.setText("");
+        textAreaErroresSintactico.setText("");
         treeView.setRoot(new TreeItem("No Elements..."));
         if (line != null) {
             line.clear();
@@ -411,7 +414,7 @@ public class Controller {
             if (!line.contains("Syntax error")){
                 resultNoErrors.add(line);
             }else {
-                textAreaErrores.appendText("\n" + line);
+                textAreaErroresSintactico.appendText("\n" + line);
             }
         }
         line = resultNoErrors;
