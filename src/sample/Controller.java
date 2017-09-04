@@ -376,7 +376,7 @@ public class Controller {
 
     private List<String> executeLexico (String pathFile){
         try {
-            String script = "D:\\PycharmProjects\\Compiler_v3\\Lexico.py";
+            String script = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\Lexico.py";
             ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
             Process process  = processBuilder.start();
 //            process.waitFor();
@@ -434,7 +434,7 @@ public class Controller {
 
     private List<String> executeSintactico(String pathFile){
         try{
-            String script = "D:\\PycharmProjects\\Compiler_v3\\Sintactico.py";
+            String script = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\Sintactico.py";
             ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
             Process process = processBuilder.start();
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))){
