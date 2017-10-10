@@ -1,12 +1,12 @@
 package model;
 
-public class Token {
+public class LexicoToken {
     private String type;
     private String lexema;
     private String row;
     private String column;
 
-    public Token(String row, String column, String type, String lexema) {
+    public LexicoToken(String row, String column, String type, String lexema) {
         this.type = type;
         this.lexema = lexema;
         this.row = row;

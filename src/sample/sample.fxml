@@ -59,8 +59,8 @@
                 <Button fx:id="buttonOpen" mnemonicParsing="false" />
                 <Button fx:id="buttonSave" mnemonicParsing="false" />
             <Button fx:id="buttonLexico" mnemonicParsing="false" text="Lexico" />
-            <Button fx:id="buttonSintactico" mnemonicParsing="false" text="Sintactico" />
-            <Button mnemonicParsing="false" text="Semantico" />
+            <Button fx:id="buttonSintactico" disable="true" mnemonicParsing="false" text="Sintactico" />
+            <Button fx:id="semantica_buttonSemantic" disable="true" mnemonicParsing="false" text="Semantico" />
             <Button mnemonicParsing="false" text="Compilar" />
             </items>
          <opaqueInsets>
@@ -158,10 +158,30 @@
                                     <content>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <TextArea fx:id="textAreaSemantico" prefHeight="200.0" prefWidth="200.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <TableView fx:id="semantica_tokenTableView" layoutX="80.0" layoutY="-37.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <columns>
+                                        <TableColumn fx:id="sematica_nombreVariable" prefWidth="75.0" text="Nombre variable" />
+                                        <TableColumn fx:id="sematica_localidad" prefWidth="75.0" text="Localidad (#registro)" />
+                                          <TableColumn fx:id="sematica_noLinea" prefWidth="75.0" text="Numero Linea" />
+                                          <TableColumn fx:id="sematica_valor" prefWidth="75.0" text="Valor" />
+                                          <TableColumn fx:id="sematica_tipo" prefWidth="75.0" text="Tipo" />
+                                      </columns>
+                                       <columnResizePolicy>
+                                          <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                       </columnResizePolicy>
+                                    </TableView>
                                  </children></AnchorPane>
                                     </content>
                                 </Tab>
+                        <Tab text="Errores Semantico">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <TextArea fx:id="semantica_textAreaErrores" prefHeight="200.0" prefWidth="200.0" style="-fx-text-fill: #ff0000;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                 </children>
+                              </AnchorPane>
+                          </content>
+                        </Tab>
                                 <Tab text="Codigo Intermedio">
                                     <content>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">

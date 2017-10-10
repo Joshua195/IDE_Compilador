@@ -10,7 +10,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import model.Archivo;
-import model.Token;
+import model.LexicoToken;
+import model.SemanticoToken;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 
@@ -23,72 +24,51 @@ import java.util.stream.Stream;
 
 public class Controller {
 
+    /*
+    * Vistas Globales
+    * */
     @FXML
     MenuItem menuItemNew;
     @FXML
     private MenuItem menuItemClose;
     @FXML
     MenuItem menuItemOpen;
-
     @FXML
     MenuItem menuItemSave;
-
     @FXML
     MenuItem menuItemSaveAs;
-
     @FXML
     Button buttonNew;
-
     @FXML
     Button buttonSave;
-
     @FXML
     Button buttonOpen;
-    @FXML
-    private Button buttonLexico;
-    @FXML
-    private Button buttonSintactico;
     @FXML
     Label labelContentStatus;
     @FXML
     Label labelContentWord;
     @FXML
     Label labelContentProgress;
-
     @FXML
     ListView<Archivo> historyFiles;
     private ObservableList<Archivo> observableListFileData = FXCollections.observableArrayList();
-
     @FXML
     private Label labelcolumRow;
-
-    /*
-    Salidas
-     */
-    @FXML
-    private TextArea textAreaSintactico;
-    @FXML
-    private TextArea textAreaSemantico;
-    @FXML
-    private TextArea textAreaCodigoIntermedio;
-    @FXML
-    private TextArea textAreaErroresLexico;
-    @FXML
-    private TextArea textAreaErroresSintactico;
-    @FXML
-    private TextArea textAreaSalida;
-    @FXML
-    private TextArea textAreaTablaSimbolos;
-    @FXML
-    private TextArea textAreaLexico;
-    /******************/
-
     private Archivo fileActive;
-
     private CodeArea textAreaCode;
     @FXML
     private StackPane stackPane;
+    /*
+    * End Vistas Globales
+    * */
 
+    /*
+    * Lexico
+    * */
+    @FXML
+    private Button buttonLexico;
+    @FXML
+    private TextArea textAreaErroresLexico;
     @FXML
     private TableColumn tableColumnType;
     @FXML
@@ -98,15 +78,68 @@ public class Controller {
     @FXML
     private TableColumn tableColumnColumn;
     @FXML
-    private TableView<Token> tokenTableView;
-    private ObservableList<Token> tokenObservableList = FXCollections.observableArrayList();
+    private TableView<LexicoToken> tokenTableView;
+    private ObservableList<LexicoToken> tokenObservableList = FXCollections.observableArrayList();
+    /*
+    * End Lexico
+    * */
 
-
+    /*
+    * Sintactico
+    * */
+    @FXML
+    private Button buttonSintactico;
+    @FXML
+    private TextArea textAreaErroresSintactico;
     private TreeItem<String> root;
     private int it = 0;  // Iterador
     private ArrayList<String> line;
     @FXML
     private TreeView treeView;
+    /*
+    * End Sintactico
+    * */
+
+    /*
+    * Semantica
+    * */
+    @FXML
+    private Button semantica_buttonSemantic;
+    @FXML
+    private TableColumn sematica_nombreVariable;
+    @FXML
+    private TableColumn sematica_localidad;
+    @FXML
+    private TableColumn sematica_noLinea;
+    @FXML
+    private TableColumn sematica_valor;
+    @FXML
+    private TableColumn sematica_tipo;
+    @FXML
+    private TextArea semantica_textAreaErrores;
+    @FXML
+    private TableView<SemanticoToken> semantica_tokenTableView;
+    private ObservableList<SemanticoToken> semantica_tokenObservableList = FXCollections.observableArrayList();
+
+    /*
+    * End Semantica
+    * */
+
+
+    /*
+    Salidas
+     */
+    @FXML
+    private TextArea textAreaCodigoIntermedio;
+    @FXML
+    private TextArea textAreaSalida;
+    @FXML
+    private TextArea textAreaTablaSimbolos;
+
+    /******************/
+
+
+
 
 
     @FXML
@@ -116,7 +149,8 @@ public class Controller {
         initEvents();
         initButtons();
         initList();
-        initColumns();
+        initColumnsLexico();
+        iniColumnsSemantic();
     }
 
     private void initAreaCode(){
@@ -126,11 +160,19 @@ public class Controller {
         stackPane.getChildren().add(new VirtualizedScrollPane<>(textAreaCode));
     }
 
-    private void initColumns(){
-        tableColumnType.setCellValueFactory(new PropertyValueFactory<Token,String>("type"));
-        tableColumnLexema.setCellValueFactory(new PropertyValueFactory<Token, String>("lexema"));
-        tableColumnRow.setCellValueFactory(new PropertyValueFactory<Token,String>("row"));
-        tableColumnColumn.setCellValueFactory(new PropertyValueFactory<Token, String>("column"));
+    private void initColumnsLexico(){
+        tableColumnType.setCellValueFactory(new PropertyValueFactory<LexicoToken,String>("type"));
+        tableColumnLexema.setCellValueFactory(new PropertyValueFactory<LexicoToken, String>("lexema"));
+        tableColumnRow.setCellValueFactory(new PropertyValueFactory<LexicoToken,String>("row"));
+        tableColumnColumn.setCellValueFactory(new PropertyValueFactory<LexicoToken, String>("column"));
+    }
+
+    private void iniColumnsSemantic(){
+        sematica_nombreVariable.setCellValueFactory(new PropertyValueFactory<SemanticoToken, String>("nombreVariable"));
+        sematica_localidad.setCellValueFactory(new PropertyValueFactory<SemanticoToken, String>("localidad"));
+        sematica_noLinea.setCellValueFactory(new PropertyValueFactory<SemanticoToken, String>("noLinea"));
+        sematica_valor.setCellValueFactory(new PropertyValueFactory<SemanticoToken, String>("valor"));
+        sematica_tipo.setCellValueFactory(new PropertyValueFactory<SemanticoToken, String>("tipo"));
     }
 
     private void initEvents(){
@@ -148,6 +190,7 @@ public class Controller {
         menuItemClose.setOnAction(event -> Main.mainStage.close());
         buttonLexico.setOnAction(event -> initLexicon());
         buttonSintactico.setOnAction(event -> initSintactico());
+        semantica_buttonSemantic.setOnAction(event -> initSematic());
     }
 
     private void initButtons(){
@@ -191,6 +234,7 @@ public class Controller {
         if (fileActive.getName().equals("new")) {
             saveAsFile();
         } else {
+            clean();
             Archivo archivo = observableListFileData.get(observableListFileData.indexOf(fileActive));
             File file = new File(archivo.getLocation());
             String code = textAreaCode.getText();
@@ -286,6 +330,14 @@ public class Controller {
         alert.showAndWait();
     }
 
+    private void fileEmpty(){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Archivo...");
+        alert.setHeaderText(null);
+        alert.setContentText("Abre o crea un nuevo archivo para continuar");
+        alert.showAndWait();
+    }
+
     private void openListViewItem(Archivo archivo){
         clean();
         File file = new File(archivo.getLocation());
@@ -352,31 +404,34 @@ public class Controller {
         clean();
         if(fileActive.getName().equals("new")){
             saveAsFile();
+        }else if (fileActive.getName().equals("")){
+            fileEmpty();
         }else {
             String file = "\"" + fileActive.getLocation() + "\"";
             List<String> list = executeLexico(file);
-            ArrayList<Token> tokensValidos = new ArrayList<>();
-            ArrayList<Token> tokensError = new ArrayList<>();
+            ArrayList<LexicoToken> tokensValidos = new ArrayList<>();
+            ArrayList<LexicoToken> tokensError = new ArrayList<>();
             for (String line : list) {
                 if (!line.contains("TKN_ERROR")) {
                     String[] desc = line.split(" ");
-                    tokensValidos.add(new Token(desc[0], desc[1], desc[2], desc[3]));
+                    tokensValidos.add(new LexicoToken(desc[0], desc[1], desc[2], desc[3]));
                 } else {
                     String[] desc = line.split(" ");
-                    tokensError.add(new Token(desc[0], desc[1], desc[2], desc[3]));
+                    tokensError.add(new LexicoToken(desc[0], desc[1], desc[2], desc[3]));
                 }
             }
-            for (Token token : tokensError){
+            for (LexicoToken token : tokensError){
                 textAreaErroresLexico.appendText(token.toString() + "\n");
             }
             tokenObservableList.addAll(tokensValidos);
             tokenTableView.setItems(tokenObservableList);
+            buttonSintactico.setDisable(false);
         }
     }
 
     private List<String> executeLexico (String pathFile){
         try {
-            String script = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\Lexico.py";
+            String script = "C:\\Users\\Joshua\\IdeaProjects\\Compiler_v3\\Lexico.py";
             ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
             Process process  = processBuilder.start();
 //            process.waitFor();
@@ -391,6 +446,7 @@ public class Controller {
 
     private void clean(){
         tokenObservableList.clear();
+        semantica_tokenObservableList.clear();
         textAreaErroresLexico.setText("");
         textAreaErroresSintactico.setText("");
         treeView.setRoot(new TreeItem("No Elements..."));
@@ -398,6 +454,8 @@ public class Controller {
             line.clear();
             it = 0;
         }
+        buttonSintactico.setDisable(true);
+        semantica_buttonSemantic.setDisable(true);
     }
 
     private void initSintactico(){
@@ -407,8 +465,8 @@ public class Controller {
             root = null;
         }
         File file = new File("Tokens.txt");
-        List<String> novalid = executeSintactico(file.getAbsolutePath());
-        List<String> result = readTree();
+        List<String> result = executeSintactico(file.getAbsolutePath());
+//        List<String> result = readTree();
         ArrayList<String> resultNoErrors = new ArrayList<>();
         for (String line : result){
             if (!line.contains("Syntax error")){
@@ -420,21 +478,51 @@ public class Controller {
         line = resultNoErrors;
         save_tree();
         treeView.setRoot(root);
+        semantica_buttonSemantic.setDisable(false);
     }
 
-    private List<String> readTree(){
-        List<String> result;
-        try(Stream<String> stream = Files.lines(Paths.get("Tree.txt"))){
-            return result = stream.collect(Collectors.toList());
+//    private List<String> readTree(){
+//        try(Stream<String> stream = Files.lines(Paths.get("Tree.txt"))){
+//            return stream.collect(Collectors.toList());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+
+    private List<String> executeSintactico(String pathFile){
+        try{
+            String script = "C:\\Users\\Joshua\\IdeaProjects\\Compiler_v3\\Sintactico.py";
+            ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
+            Process process = processBuilder.start();
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))){
+                return bufferedReader.lines().collect(Collectors.toList());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private List<String> executeSintactico(String pathFile){
+    private void initSematic(){
+        File file = new File("tree.bin");
+        List<String> result = executeSemantic(file.getAbsolutePath());
+        ArrayList<SemanticoToken> semanticoTokens = new ArrayList<>();
+        for (String line : result){
+            if (!line.contains("Gramatical error")){
+                String[] split_line = line.split("-");
+                semanticoTokens.add(new SemanticoToken(split_line[0],split_line[1],split_line[2],split_line[3],split_line[4]));
+            }else {
+                semantica_textAreaErrores.appendText(line + "\n");
+            }
+        }
+        semantica_tokenObservableList.addAll(semanticoTokens);
+        semantica_tokenTableView.setItems(semantica_tokenObservableList);
+    }
+
+    private List<String> executeSemantic(String pathFile){
         try{
-            String script = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\Sintactico.py";
+            String script = "C:\\Users\\Joshua\\IdeaProjects\\Compiler_v3\\Gramatical.py";
             ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
             Process process = processBuilder.start();
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))){

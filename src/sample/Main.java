@@ -7,6 +7,12 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+
 public class Main extends Application {
 
     public static Stage mainStage;
@@ -20,6 +26,18 @@ public class Main extends Application {
         mainScene.getStylesheets().add(Main.class.getResource("style.css").toExternalForm());
         primaryStage.setScene(mainScene);
         primaryStage.show();
+        primaryStage.setOnCloseRequest(event -> clean());
+    }
+
+    private void clean(){
+        File tokens = new File("Tokens.txt");
+        File hashtable = new File("Hashtable.txt");
+        File treeBin = new File("tree.bin");
+        File tree = new File("Tree.txt");
+        tokens.delete();
+        hashtable.delete();
+        treeBin.delete();
+        tree.delete();
     }
 
 
