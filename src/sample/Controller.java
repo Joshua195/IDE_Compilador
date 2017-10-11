@@ -25,8 +25,8 @@ import java.util.stream.Stream;
 public class Controller {
 
 
-    public static final String PATH = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\";
-//    public static final String PATH = "C:\\Users\\Joshua\\IdeaProjects\\Compiler_v3\\";
+//    public static final String PATH = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\";
+    public static final String PATH = "E:\\Usuarios\\Joshua\\IdeaProjects\\Compiler_v3\\";
 
     /*
     * Vistas Globales
@@ -62,6 +62,10 @@ public class Controller {
     private CodeArea textAreaCode;
     @FXML
     private StackPane stackPane;
+    @FXML
+    private TabPane outputBottom;
+    @FXML
+    private TabPane outputRight;
     /*
     * End Vistas Globales
     * */
@@ -428,6 +432,8 @@ public class Controller {
             tokenObservableList.addAll(tokensValidos);
             tokenTableView.setItems(tokenObservableList);
             buttonSintactico.setDisable(false);
+            outputBottom.getSelectionModel().select(0);
+            outputRight.getSelectionModel().select(0);
         }
     }
 
@@ -451,6 +457,7 @@ public class Controller {
         semantica_tokenObservableList.clear();
         textAreaErroresLexico.setText("");
         textAreaErroresSintactico.setText("");
+        semantica_textAreaErrores.setText("");
         treeView.setRoot(new TreeItem("No Elements..."));
         if (line != null) {
             line.clear();
@@ -458,6 +465,8 @@ public class Controller {
         }
         buttonSintactico.setDisable(true);
         semantica_buttonSemantic.setDisable(true);
+        outputBottom.getSelectionModel().select(0);
+        outputRight.getSelectionModel().select(0);
     }
 
     private void initSintactico(){
@@ -468,7 +477,6 @@ public class Controller {
         }
         File file = new File("Tokens.txt");
         List<String> result = executeSintactico(file.getAbsolutePath());
-//        List<String> result = readTree();
         ArrayList<String> resultNoErrors = new ArrayList<>();
         for (String line : result){
             if (!line.contains("Syntax error")){
@@ -481,16 +489,10 @@ public class Controller {
         save_tree();
         treeView.setRoot(root);
         semantica_buttonSemantic.setDisable(false);
+        outputBottom.getSelectionModel().select(1);
+        outputRight.getSelectionModel().select(1);
     }
 
-//    private List<String> readTree(){
-//        try(Stream<String> stream = Files.lines(Paths.get("Tree.txt"))){
-//            return stream.collect(Collectors.toList());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
 
     private List<String> executeSintactico(String pathFile){
         try{
@@ -507,6 +509,8 @@ public class Controller {
     }
 
     private void initSematic(){
+        semantica_textAreaErrores.setText("");
+        semantica_tokenObservableList.clear();
         File file = new File("tree.bin");
         List<String> result = executeSemantic(file.getAbsolutePath());
         ArrayList<SemanticoToken> semanticoTokens = new ArrayList<>();
@@ -520,6 +524,8 @@ public class Controller {
         }
         semantica_tokenObservableList.addAll(semanticoTokens);
         semantica_tokenTableView.setItems(semantica_tokenObservableList);
+        outputBottom.getSelectionModel().select(2);
+        outputRight.getSelectionModel().select(2);
     }
 
     private List<String> executeSemantic(String pathFile){
