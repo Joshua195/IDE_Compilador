@@ -24,6 +24,10 @@ import java.util.stream.Stream;
 
 public class Controller {
 
+
+    public static final String PATH = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\";
+//    public static final String PATH = "C:\\Users\\Joshua\\IdeaProjects\\Compiler_v3\\";
+
     /*
     * Vistas Globales
     * */
@@ -137,8 +141,6 @@ public class Controller {
     private TextArea textAreaTablaSimbolos;
 
     /******************/
-
-
 
 
 
@@ -431,7 +433,7 @@ public class Controller {
 
     private List<String> executeLexico (String pathFile){
         try {
-            String script = "C:\\Users\\Joshua\\IdeaProjects\\Compiler_v3\\Lexico.py";
+            String script = PATH + "Lexico.py";
             ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
             Process process  = processBuilder.start();
 //            process.waitFor();
@@ -492,7 +494,7 @@ public class Controller {
 
     private List<String> executeSintactico(String pathFile){
         try{
-            String script = "C:\\Users\\Joshua\\IdeaProjects\\Compiler_v3\\Sintactico.py";
+            String script = PATH + "Sintactico.py";
             ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
             Process process = processBuilder.start();
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))){
@@ -522,7 +524,7 @@ public class Controller {
 
     private List<String> executeSemantic(String pathFile){
         try{
-            String script = "C:\\Users\\Joshua\\IdeaProjects\\Compiler_v3\\Gramatical.py";
+            String script = PATH + "Gramatical.py";
             ProcessBuilder processBuilder = new ProcessBuilder("python", script, pathFile);
             Process process = processBuilder.start();
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))){
