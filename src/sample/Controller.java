@@ -99,11 +99,8 @@ public class Controller {
     private Button buttonSintactico;
     @FXML
     private TextArea textAreaErroresSintactico;
-    private TreeItem<String> root;
-    private int it = 0;  // Iterador
-    private ArrayList<String> line;
     @FXML
-    private TreeView treeView;
+    private TreeView sintactico_treeView;
     /*
     * End Sintactico
     * */
@@ -128,6 +125,8 @@ public class Controller {
     @FXML
     private TableView<SemanticoToken> semantica_tokenTableView;
     private ObservableList<SemanticoToken> semantica_tokenObservableList = FXCollections.observableArrayList();
+    @FXML
+    private TreeView semantica_treeView;
 
     /*
     * End Semantica
@@ -458,11 +457,9 @@ public class Controller {
         textAreaErroresLexico.setText("");
         textAreaErroresSintactico.setText("");
         semantica_textAreaErrores.setText("");
-        treeView.setRoot(new TreeItem("No Elements..."));
-        if (line != null) {
-            line.clear();
-            it = 0;
-        }
+        sintactico_treeView.setRoot(new TreeItem("No Elements..."));
+        semantica_treeView.setRoot(new TreeItem("No Elements..."));
+        it = 0;
         buttonSintactico.setDisable(true);
         semantica_buttonSemantic.setDisable(true);
         outputBottom.getSelectionModel().select(0);
@@ -470,11 +467,6 @@ public class Controller {
     }
 
     private void initSintactico(){
-        if (line != null){
-            line.clear();
-            it = 0;
-            root = null;
-        }
         File file = new File("Tokens.txt");
         List<String> result = executeSintactico(file.getAbsolutePath());
         ArrayList<String> resultNoErrors = new ArrayList<>();
@@ -485,9 +477,8 @@ public class Controller {
                 textAreaErroresSintactico.appendText("\n" + line);
             }
         }
-        line = resultNoErrors;
-        save_tree();
-        treeView.setRoot(root);
+        sintactico_treeView.setRoot(save_tree(resultNoErrors));
+        it = 0;
         semantica_buttonSemantic.setDisable(false);
         outputBottom.getSelectionModel().select(1);
         outputRight.getSelectionModel().select(1);
@@ -514,18 +505,23 @@ public class Controller {
         File file = new File("tree.bin");
         List<String> result = executeSemantic(file.getAbsolutePath());
         ArrayList<SemanticoToken> semanticoTokens = new ArrayList<>();
+        List<String> treeSemantic = new ArrayList<>();
         for (String line : result){
-            if (!line.contains("Gramatical error")){
+            if (!line.contains("Gramatical error") && !line.contains("main") && !line.contains("   ")){
                 String[] split_line = line.split("-");
                 semanticoTokens.add(new SemanticoToken(split_line[0],split_line[1],split_line[2],split_line[3],split_line[4]));
+            }else if(line.contains("   ") || line.contains("main")){
+                treeSemantic.add(line);
             }else {
                 semantica_textAreaErrores.appendText(line + "\n");
             }
         }
+        semantica_treeView.setRoot(save_tree(treeSemantic));
         semantica_tokenObservableList.addAll(semanticoTokens);
         semantica_tokenTableView.setItems(semantica_tokenObservableList);
         outputBottom.getSelectionModel().select(2);
         outputRight.getSelectionModel().select(2);
+        it = 0;
     }
 
     private List<String> executeSemantic(String pathFile){
@@ -542,26 +538,30 @@ public class Controller {
         return null;
     }
 
-    private void save_tree(){
-        root = new TreeItem<String>(line.get(it));
+    private int it = 0;
+    private TreeItem<String> save_tree(List<String> line){
+        TreeItem<String> root = new TreeItem<String>(line.get(it));
         root.setExpanded(true);
-        it++;
-        get_Tree(0, root);
+        this.it++;
+        return get_Tree(0, root, line);
     }
 
-    private void get_Tree(int prevTab, TreeItem<String> root){
+    private TreeItem<String> get_Tree(int prevTab, TreeItem<String> root, List<String> line){
         // Contamos el numero de Tabulaciones que tiene la linea
+        int i = root.getChildren().size();
         while (it < line.size()){
             int tabs = count_tabs(line.get(it));
             if (tabs > prevTab){  // Si es hijo
-                String [] token = line.get(it).split(" ");
-                root.getChildren().add(new TreeItem<>(token[token.length-1]));  // El ultimo del split será el token
+                TreeItem<String> children = new TreeItem<>(line.get(it).replace("   ",""));
+                children.setExpanded(true);
+                root.getChildren().add(children);
                 it++;
-                get_Tree(tabs, root.getChildren().get(root.getChildren().size()-1));  // El ultimo agregado
+                get_Tree(tabs, root.getChildren().get(root.getChildren().size()-1), line);  // El ultimo agregado
             }else{
                 break;
             }
         }
+        return root;
     }
 
     private int count_tabs(String linea){
@@ -575,13 +575,6 @@ public class Controller {
             contador++;
             contador /= 4;
         }
-//        char [] test = linea.toCharArray();
-//        int testing = 0;
-//        for (char c : test){
-//            if (c == '\t'){
-//                testing++;
-//            }
-//        }
         return contador;
     }
 

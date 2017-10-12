@@ -30,14 +30,11 @@ public class Main extends Application {
     }
 
     private void clean(){
-        File tokens = new File("Tokens.txt");
-        File hashtable = new File("Hashtable.txt");
-        File treeBin = new File("tree.bin");
-        File tree = new File("Tree.txt");
-        tokens.delete();
-        hashtable.delete();
-        treeBin.delete();
-        tree.delete();
+        boolean tokens = new File("Tokens.txt").delete();
+        boolean hashtable = new File("Hashtable.txt").delete();
+        boolean treeBin = new File("tree.bin").delete();
+        boolean tree = new File("Tree.txt").delete();
+        boolean gramaticalTree = new File("Gramatical_Tree.txt").delete();
     }
 
 
