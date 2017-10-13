@@ -25,8 +25,8 @@ import java.util.stream.Stream;
 public class Controller {
 
 
-//    public static final String PATH = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\";
-    public static final String PATH = "E:\\Usuarios\\Joshua\\IdeaProjects\\Compiler_v3\\";
+    public static final String PATH = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\";
+//    public static final String PATH = "E:\\Usuarios\\Joshua\\IdeaProjects\\Compiler_v3\\";
 
     /*
     * Vistas Globales
@@ -566,9 +566,12 @@ public class Controller {
 
     private int count_tabs(String linea){
         int contador = 0;
-        for (int i = 0; i < linea.length(); i++){
-            if (linea.charAt(i) == ' ')
+        for (int i = 0; i < linea.length(); i++) {
+            if (linea.charAt(i) == ' '){
                 contador++;
+            }else{
+                break;
+            }
         }
         // Al no poder hacer split('\t'), contamos los (espaciosTotales+1)/4
         if (contador > 0){
