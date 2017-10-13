@@ -506,10 +506,12 @@ public class Controller {
         List<String> result = executeSemantic(file.getAbsolutePath());
         ArrayList<SemanticoToken> semanticoTokens = new ArrayList<>();
         List<String> treeSemantic = new ArrayList<>();
+        int i = 0;
         for (String line : result){
             if (!line.contains("Gramatical error") && !line.contains("main") && !line.contains("   ")){
                 String[] split_line = line.split("-");
-                semanticoTokens.add(new SemanticoToken(split_line[0],split_line[1],split_line[2],split_line[3],split_line[4]));
+                semanticoTokens.add(new SemanticoToken(split_line[0], String.valueOf(i),split_line[2],split_line[3],split_line[4]));
+                i++;
             }else if(line.contains("   ") || line.contains("main")){
                 treeSemantic.add(line);
             }else {
