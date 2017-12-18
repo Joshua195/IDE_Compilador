@@ -500,6 +500,7 @@ public class Controller {
         outputRight.getSelectionModel().select(0);
         execute_program.setDisable(true);
         codgen_initButton.setDisable(true);
+        textAreaCodigoIntermedio.setText("");
     }
 
     private void initSintactico(){
