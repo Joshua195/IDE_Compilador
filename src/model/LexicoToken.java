@@ -7,6 +7,7 @@ public class LexicoToken {
     private String column;
 
     public LexicoToken(String row, String column, String type, String lexema) {
+
         this.type = type;
         this.lexema = lexema;
         this.row = row;

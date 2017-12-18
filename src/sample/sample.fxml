@@ -61,7 +61,9 @@
             <Button fx:id="buttonLexico" mnemonicParsing="false" text="Lexico" />
             <Button fx:id="buttonSintactico" disable="true" mnemonicParsing="false" text="Sintactico" />
             <Button fx:id="semantica_buttonSemantic" disable="true" mnemonicParsing="false" text="Semantico" />
-            <Button mnemonicParsing="false" text="Compilar" />
+            <Button fx:id="codgen_initButton" disable="true" mnemonicParsing="false" text="Codigo Intermedio" />
+            <Button fx:id="execute_program" disable="true" mnemonicParsing="false" text="Ejecutar" />
+            <Button fx:id="button_compile" disable="true" mnemonicParsing="false" text="Compilar" />
             </items>
          <opaqueInsets>
             <Insets />
@@ -190,19 +192,11 @@
                                  </children></AnchorPane>
                                     </content>
                                 </Tab>
-                                <Tab disable="true" text="Codigo Intermedio">
+                                <Tab text="Codigo Intermedio">
                                     <content>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <TextArea fx:id="textAreaCodigoIntermedio" prefHeight="200.0" prefWidth="200.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                 </children></AnchorPane>
-                                    </content>
-                                </Tab>
-                                <Tab disable="true" text="Salida">
-                                    <content>
-                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                 <children>
-                                    <TextArea fx:id="textAreaSalida" prefHeight="200.0" prefWidth="200.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <TextArea fx:id="textAreaCodigoIntermedio" editable="false" prefHeight="200.0" prefWidth="200.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                  </children></AnchorPane>
                                     </content>
                                 </Tab>

@@ -1,7 +1,12 @@
 package sample;
 
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -19,14 +24,15 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Controller {
 
 
-    public static final String PATH = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\";
-//    public static final String PATH = "E:\\Usuarios\\Joshua\\IdeaProjects\\Compiler_v3\\";
+//    public static final String PATH = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\";
+    public static final String PATH = "E:\\Usuarios\\Joshua\\IdeaProjects\\Compiler_v3\\";
 
     /*
     * Vistas Globales
@@ -139,9 +145,17 @@ public class Controller {
     @FXML
     private TextArea textAreaCodigoIntermedio;
     @FXML
+    private TextArea textAreaTablaSimbolos;
+    @FXML
+    private Tab shellTabOutput;
+    @FXML
+    Button button_compile;
+    @FXML
     private TextArea textAreaSalida;
     @FXML
-    private TextArea textAreaTablaSimbolos;
+    private Button codgen_initButton;
+    @FXML
+    private Button execute_program;
 
     /******************/
 
@@ -158,11 +172,29 @@ public class Controller {
         iniColumnsSemantic();
     }
 
+    private void test() {
+        ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/C", "start","java", "-jar", "E:\\Usuarios\\Joshua\\Documents\\projects\\TestingConsole\\out\\artifacts\\TestingConsole_jar\\TestingConsole.jar");
+        try {
+            Process process  = processBuilder.start();
+            process.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void initAreaCode(){
         CodeAreaControl codeAreaControl = new CodeAreaControl();
         textAreaCode = codeAreaControl.getCodeArea();
         textAreaCode.setDisable(true);
         stackPane.getChildren().add(new VirtualizedScrollPane<>(textAreaCode));
+        textAreaCode.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                clean();
+            }
+        });
     }
 
     private void initColumnsLexico(){
@@ -196,6 +228,8 @@ public class Controller {
         buttonLexico.setOnAction(event -> initLexicon());
         buttonSintactico.setOnAction(event -> initSintactico());
         semantica_buttonSemantic.setOnAction(event -> initSematic());
+        codgen_initButton.setOnAction(event -> initGenCode());
+        execute_program.setOnAction(event -> initExecutionProgram());
     }
 
     private void initButtons(){
@@ -464,6 +498,8 @@ public class Controller {
         semantica_buttonSemantic.setDisable(true);
         outputBottom.getSelectionModel().select(0);
         outputRight.getSelectionModel().select(0);
+        execute_program.setDisable(true);
+        codgen_initButton.setDisable(true);
     }
 
     private void initSintactico(){
@@ -521,6 +557,7 @@ public class Controller {
         semantica_tokenTableView.setItems(semantica_tokenObservableList);
         outputBottom.getSelectionModel().select(2);
         outputRight.getSelectionModel().select(2);
+        codgen_initButton.setDisable(false);
         it = 0;
     }
 
@@ -536,6 +573,45 @@ public class Controller {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void initGenCode(){
+        File gramatical_tree = new File("gramatical_tree.bin");
+        File hashtable = new File("hashtable.bin");
+        executeGenCode(gramatical_tree.getAbsolutePath(), hashtable.getAbsolutePath());
+        File resultFile = new File("code.TM");
+        try(Stream<String> stringStream = Files.lines(Paths.get(resultFile.getAbsolutePath()))) {
+            stringStream.forEach(line -> textAreaCodigoIntermedio.appendText(line + "\n"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        outputBottom.getSelectionModel().select(4);
+        execute_program.setDisable(false);
+    }
+
+    private List<String> executeGenCode(String gramatical_tree, String hashtable){
+        try {
+            String script = PATH + "GenCodigo.py";
+            ProcessBuilder processBuilder = new ProcessBuilder("python", script, gramatical_tree, hashtable);
+            Process process = processBuilder.start();
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))){
+                return bufferedReader.lines().collect(Collectors.toList());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void initExecutionProgram(){
+        File resultFile = new File("code.TM");
+//        ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/C", "start", "ubicacion_tm", resultFile.getAbsolutePath());
+        ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/C", "start","java", "-jar", "E:\\Usuarios\\Joshua\\Documents\\projects\\TestingConsole\\out\\artifacts\\TestingConsole_jar\\TestingConsole.jar");
+        try {
+            Process process  = processBuilder.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private int it = 0;
