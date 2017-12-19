@@ -7,11 +7,18 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import model.Archivo;
@@ -25,6 +32,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -157,7 +166,21 @@ public class Controller {
     @FXML
     private Button execute_program;
 
+    @FXML
+    public TextArea salida;
+
     /******************/
+
+
+
+
+    /*****************/
+    private ProcessBuilder pb;
+    private Process process;
+    private String input = "";
+    private BufferedReader stdInput, stdError;
+    private OutputStream out;
+    /*****************/
 
 
 
@@ -172,16 +195,56 @@ public class Controller {
         iniColumnsSemantic();
     }
 
-    private void test() {
-        ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/C", "start","java", "-jar", "E:\\Usuarios\\Joshua\\Documents\\projects\\TestingConsole\\out\\artifacts\\TestingConsole_jar\\TestingConsole.jar");
-        try {
-            Process process  = processBuilder.start();
-            process.waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void initExecutionProgram() {
+        salida.setOnKeyTyped(event -> {
+            input = input.concat(event.getCharacter());
+            System.out.println(input);
+        });
+
+        final KeyCombination keyComb1 = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
+        salida.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                try {
+                    String command = input.replaceAll("\r", "") + "\n";
+                    command = input.replaceAll("\b", "");
+                    System.out.println(command);
+                    out.write(command.getBytes());
+                    out.flush();
+                    input = "";
+                    System.out.println("Command Sent");
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            } else if (keyComb1.match(event)) {
+                System.out.println("Control+C pressed");
+            }else if (event.getCode()== KeyCode.BACK_SPACE){
+                //    input=input.substring(0, input.length()-1);
+                //  System.out.println(input);
+            }
+
+        });
+
+        File resultFile = new File("code.TM");
+//        pb = new ProcessBuilder("cmd", "ubicacion_tm", resultFile.getAbsolutePath());
+        pb = new ProcessBuilder("java", "-jar", "C:\\Users\\Joshua\\Documents\\work\\fosscam\\untitled\\out\\artifacts\\untitled_jar\\untitled.jar");
+        new Thread(() -> {
+            try {
+                process = pb.start();
+                stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                //OutputStream out;
+                out = process.getOutputStream();
+                StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR");
+                // any output?
+                StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT");
+                // start gobblers
+                outputGobbler.start();
+                errorGobbler.start();
+                process.waitFor();
+            } catch (IOException | InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }).start();
     }
 
     private void initAreaCode(){
@@ -606,13 +669,16 @@ public class Controller {
         }
     }
 
-    private void initExecutionProgram(){
+    private void test(){
+
         File resultFile = new File("code.TM");
 //        ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/C", "start", "ubicacion_tm", resultFile.getAbsolutePath());
         ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/C", "start","java", "-jar", "E:\\Usuarios\\Joshua\\Documents\\projects\\TestingConsole\\out\\artifacts\\TestingConsole_jar\\TestingConsole.jar");
         try {
             Process process  = processBuilder.start();
-        } catch (IOException e) {
+            process.waitFor();
+
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -660,4 +726,29 @@ public class Controller {
         return contador;
     }
 
+    private class StreamGobbler extends Thread {
+        InputStream is;
+        String type;
+
+        private StreamGobbler(InputStream is, String type) {
+            this.is = is;
+            this.type = type;
+        }
+
+        @Override
+        public void run() {
+            try {
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    System.out.println(type + "> " + line);
+                    String str =line;
+                    Platform.runLater(() -> salida.appendText(str + "\n"));
+                }
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+    }
 }
