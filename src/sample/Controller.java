@@ -40,8 +40,8 @@ import java.util.stream.Stream;
 public class Controller {
 
 
-//    public static final String PATH = "C:\\Users\\Richa\\PycharmProjects\\Compiler_v3\\";
-    public static final String PATH = "E:\\Usuarios\\Joshua\\IdeaProjects\\Compiler_v3\\";
+    public static final String PATH = "C:\\Users\\Richa\\PycharmProjects\\Compiler\\";
+//    public static final String PATH = "E:\\Usuarios\\Joshua\\IdeaProjects\\Compiler_v3\\";
 
     /*
     * Vistas Globales
@@ -206,7 +206,7 @@ public class Controller {
             if (event.getCode() == KeyCode.ENTER) {
                 try {
                     String command = input.replaceAll("\r", "") + "\n";
-                    command = input.replaceAll("\b", "");
+//                    command = input.replaceAll("\b", "");
                     System.out.println(command);
                     out.write(command.getBytes());
                     out.flush();
@@ -224,9 +224,9 @@ public class Controller {
 
         });
 
-        File resultFile = new File("code.TM");
-//        pb = new ProcessBuilder("cmd", "ubicacion_tm", resultFile.getAbsolutePath());
-        pb = new ProcessBuilder("java", "-jar", "C:\\Users\\Joshua\\Documents\\work\\fosscam\\untitled\\out\\artifacts\\untitled_jar\\untitled.jar");
+        File resultFile = new File("code.RJI");
+        pb = new ProcessBuilder("python", "C:\\Users\\Richa\\PycharmProjects\\Compiler\\TM.py", resultFile.getAbsolutePath());
+//        pb = new ProcessBuilder("java", "-jar", "C:\\Users\\Joshua\\Documents\\work\\fosscam\\untitled\\out\\artifacts\\untitled_jar\\untitled.jar");
         new Thread(() -> {
             try {
                 process = pb.start();
@@ -245,6 +245,7 @@ public class Controller {
                 ex.printStackTrace();
             }
         }).start();
+        outputBottom.getSelectionModel().select(4);
     }
 
     private void initAreaCode(){
@@ -645,13 +646,13 @@ public class Controller {
         File gramatical_tree = new File("gramatical_tree.bin");
         File hashtable = new File("hashtable.bin");
         executeGenCode(gramatical_tree.getAbsolutePath(), hashtable.getAbsolutePath());
-        File resultFile = new File("code.TM");
+        File resultFile = new File("code.RJI");
         try(Stream<String> stringStream = Files.lines(Paths.get(resultFile.getAbsolutePath()))) {
             stringStream.forEach(line -> textAreaCodigoIntermedio.appendText(line + "\n"));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        outputBottom.getSelectionModel().select(4);
+        outputRight.getSelectionModel().select(3);
         execute_program.setDisable(false);
     }
 

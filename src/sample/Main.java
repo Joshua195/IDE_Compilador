@@ -37,7 +37,7 @@ public class Main extends Application {
         new File("Gramatical_Tree.txt").delete();
         new File("gramatical_tree.bin").delete();
         new File("hashtable.bin").delete();
-        new File("code.TM").delete();
+        new File("code.RJI").delete();
     }
 
 
