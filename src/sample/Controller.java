@@ -294,6 +294,15 @@ public class Controller {
         semantica_buttonSemantic.setOnAction(event -> initSematic());
         codgen_initButton.setOnAction(event -> initGenCode());
         execute_program.setOnAction(event -> initExecutionProgram());
+        button_compile.setOnAction(event -> execute());
+    }
+
+    private void execute(){
+        initLexicon();
+        initSintactico();
+        initSematic();
+        initGenCode();
+        initExecutionProgram();
     }
 
     private void initButtons(){
@@ -565,6 +574,7 @@ public class Controller {
         execute_program.setDisable(true);
         codgen_initButton.setDisable(true);
         textAreaCodigoIntermedio.setText("");
+        salida.setText("");
     }
 
     private void initSintactico(){
@@ -745,7 +755,11 @@ public class Controller {
                 while ((line = br.readLine()) != null) {
                     System.out.println(type + "> " + line);
                     String str =line;
-                    Platform.runLater(() -> salida.appendText(str + "\n"));
+                    Platform.runLater(() -> {
+                        if (!str.equals("\n")){
+                            salida.appendText(str + "\n");
+                        }
+                    });
                 }
             } catch (IOException ioe) {
                 ioe.printStackTrace();
