@@ -225,7 +225,7 @@ public class Controller {
         });
 
         File resultFile = new File("code.RJI");
-        pb = new ProcessBuilder("python", "C:\\Users\\Richa\\PycharmProjects\\Compiler\\TM.py", resultFile.getAbsolutePath());
+        pb = new ProcessBuilder("python", PATH+"TM.py", resultFile.getAbsolutePath());
 //        pb = new ProcessBuilder("java", "-jar", "C:\\Users\\Joshua\\Documents\\work\\fosscam\\untitled\\out\\artifacts\\untitled_jar\\untitled.jar");
         new Thread(() -> {
             try {
@@ -677,20 +677,6 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
-        }
-    }
-
-    private void test(){
-
-        File resultFile = new File("code.TM");
-//        ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/C", "start", "ubicacion_tm", resultFile.getAbsolutePath());
-        ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/C", "start","java", "-jar", "E:\\Usuarios\\Joshua\\Documents\\projects\\TestingConsole\\out\\artifacts\\TestingConsole_jar\\TestingConsole.jar");
-        try {
-            Process process  = processBuilder.start();
-            process.waitFor();
-
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
